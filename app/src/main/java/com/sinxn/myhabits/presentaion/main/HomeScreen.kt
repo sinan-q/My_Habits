@@ -1,10 +1,14 @@
 package com.sinxn.myhabits.presentaion.main
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
@@ -13,25 +17,30 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.sinxn.myhabits.R
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: MainViewModel = hiltViewModel()
 ){
+
+    val lazyListState = rememberLazyListState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -78,9 +87,9 @@ fun HomeScreen(
                 }
 
             }
-            LazyRow() {
-                items(6) {
-                    DateRow()
+            LazyRow(state = lazyListState,horizontalArrangement = Arrangement.Center) {
+                items(viewModel.dateRow) { item ->
+                    DateRow(item.Date,item.dateString,viewModel.currentDate.value.toString()) { }
                 }
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -133,13 +142,31 @@ fun HomeScreen(
 
         }
     }
+
+    LaunchedEffect(lazyListState) {
+        lazyListState.animateScrollToItem(lazyListState.layoutInfo.visibleItemsInfo.lastIndex / 2)
+    }
 }
 
+
 @Composable
-fun DateRow() {
-    Column(modifier = Modifier.padding(end = 40.dp)) {
-        Text(text = "Thu", fontSize = 14.sp)
-        Text(text = "17", fontSize = 14.sp)
+fun DateRow(
+    dateString: String,
+    date: String,
+    today: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(modifier = Modifier
+        .size(80.dp)
+        .padding(end = 15.dp)
+        .clickable { onClick() }, contentAlignment = Alignment.Center ) {
+        if (date == today) modifier.background(color = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer).clip(RoundedCornerShape(16.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally  ) {
+            Text(text = dateString, fontSize = 14.sp)
+            Text(text = date, fontSize = 14.sp)
+        }
+
     }
 }
 
@@ -164,10 +191,3 @@ fun HabitRow() {
     }
 }
 
-@Preview
-@Composable
-fun SpacesScreenPreview() {
-    HomeScreen(
-        navController = rememberNavController()
-    )
-}
