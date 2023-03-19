@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Habits</string>
+    <string name="home">Home</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="settings">Settings</string>
+    <string name="reminders_channel_name">Remainders</string>
+    <string name="reminders_channel_description">Notification channel for sending remainder notifications</string>
+</resources>
