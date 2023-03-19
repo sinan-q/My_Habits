@@ -89,7 +89,7 @@ fun HomeScreen(
             }
             LazyRow(state = lazyListState,horizontalArrangement = Arrangement.Center) {
                 items(viewModel.dateRow) { item ->
-                    DateRow(item.Date,item.dateString,viewModel.currentDate.value.toString()) { }
+                    DateRow(item.Date,item.dateString,viewModel.currentDate.toString()) { }
                 }
             }
             Spacer(modifier = Modifier.height(15.dp))

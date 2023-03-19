@@ -5,4 +5,8 @@
     <string name="settings">Settings</string>
     <string name="reminders_channel_name">Remainders</string>
     <string name="reminders_channel_description">Notification channel for sending remainder notifications</string>
+    <string name="delete_sub_task">Delete a sub task</string>
+    <string name="daily">Daily</string>
+    <string name="monthly">Monthly</string>
+    <string name="weekly">Weekly</string>
 </resources>

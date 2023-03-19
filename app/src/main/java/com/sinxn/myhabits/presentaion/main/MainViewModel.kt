@@ -1,6 +1,7 @@
 package com.sinxn.myhabits.presentaion.main
-
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.sinxn.myhabits.domain.use_case.settings.GetSettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +16,7 @@ class MainViewModel @Inject constructor(
     ) : ViewModel() {
 
     var dateRow:MutableList<DateRowClass> = mutableListOf()
-    var currentDate = mutableStateOf(LocalDate.now().dayOfMonth)
+    var currentDate by mutableStateOf(LocalDate.now().dayOfMonth)
 
     init {
         for (i in -4..4) {
