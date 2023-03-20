@@ -2,11 +2,12 @@ package com.sinxn.myhabits.presentaion.main
 
 import com.sinxn.myhabits.domain.model.Progress
 import com.sinxn.myhabits.domain.model.Task
+import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.util.settings.Order
 
 sealed class TaskEvent {
     data class CompleteTask(val task: Task, val complete: Boolean) : TaskEvent()
-    data class GetTask(val taskId: Long) : TaskEvent()
+    data class GetTask(val task: TaskWithProgress) : TaskEvent()
     data class AddTask(val task: Task) : TaskEvent()
     data class SearchTasks(val query: String) : TaskEvent()
     data class UpdateOrder(val order: Order) : TaskEvent()

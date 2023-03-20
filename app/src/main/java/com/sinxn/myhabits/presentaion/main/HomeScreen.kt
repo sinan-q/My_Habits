@@ -131,10 +131,11 @@ fun HomeScreen(
             }
             LazyRow(modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)) {
                 items(uiState.goodTasks) {task ->
-                    HabitRow(task) {
+                    HabitRow(task) {id ->
                         openDialog=true
-                        viewModel.onEvent(TaskEvent.GetTask(it))
-                    } }
+                        uiState.goodTasks.find { it.task.id == id}
+                            ?.let { TaskEvent.GetTask(task = it) }?.let { viewModel.onEvent(it) } }
+                    }
             }
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -160,10 +161,10 @@ fun HomeScreen(
             }
             LazyRow() {
                 items(uiState.badTasks) { task ->
-                    HabitRow(task) {
+                    HabitRow(task) { id ->
                         openDialog=true
-                        viewModel.onEvent(TaskEvent.GetTask(it))
-                    }
+                        uiState.badTasks.find { it.task.id == id}
+                            ?.let { TaskEvent.GetTask(task = it) }?.let { viewModel.onEvent(it) } }
 
                 }
             }
@@ -215,6 +216,8 @@ fun HabitRow(
 
 ) {
 
+    val progress = "${if (taskWithProgress.progress != null) taskWithProgress.progress.subTasks.filter { it.isCompleted }.size else "0"} / ${taskWithProgress.task.subTasks.size}"
+
     Box(modifier = Modifier
         .padding(end = 35.dp)
         .width(130.dp)
@@ -230,7 +233,7 @@ fun HabitRow(
 
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = taskWithProgress.task.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = taskWithProgress.task.id.toString())
+            Text(text = progress)
         }
     }
 }

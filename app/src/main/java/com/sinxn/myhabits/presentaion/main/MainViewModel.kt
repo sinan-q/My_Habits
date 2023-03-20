@@ -125,17 +125,15 @@ class MainViewModel @Inject constructor(
 //                        else
 //                            deleteAlarm(event.task.id)
 //                    }
-                    taskDetailsUiState = taskDetailsUiState.copy(navigateUp = true)
                 }
             }
             is TaskEvent.DeleteTask -> viewModelScope.launch {
                 deleteTask(event.task)
                 if (event.task.remainder) deleteAlarm(event.task.id)
-                taskDetailsUiState = taskDetailsUiState.copy(navigateUp = true)
             }
             is TaskEvent.GetTask -> viewModelScope.launch {
                 taskDetailsUiState = taskDetailsUiState.copy(
-                    task = getTaskUseCase(tasksUiState.date,event.taskId)
+                    task = event.task
                 )
             }
             else -> {}
@@ -156,7 +154,6 @@ class MainViewModel @Inject constructor(
 
     data class TaskUiState(
         val task: TaskWithProgress = TaskWithProgress(task = Task(title = "", emoji = ""),progress = null),
-        val navigateUp: Boolean = false,
         val error: String? = null
     )
 
