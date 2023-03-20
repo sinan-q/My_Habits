@@ -1,13 +1,15 @@
 package com.sinxn.myhabits.presentaion.main
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.R
 import com.sinxn.myhabits.app.getString
 import com.sinxn.myhabits.domain.model.Alarm
+import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.domain.use_case.alarm.AddAlarmUseCase
 import com.sinxn.myhabits.domain.use_case.alarm.DeleteAlarmUseCase
 import com.sinxn.myhabits.domain.use_case.task.*
@@ -50,13 +52,12 @@ class MainViewModel @Inject constructor(
     var currentDate by mutableStateOf(LocalDate.now().dayOfMonth)
 
     init {
-        for (i in -4..4) {
-            val date = LocalDate.now().plusDays(i.toLong())
-            dateRow.add(DateRowClass(date.dayOfMonth.toString(),date.dayOfWeek.name.slice(0..2)))
-        }
         viewModelScope.launch {
-
-            getTasks()
+            for (i in -4..4) {
+                val date = LocalDate.now().plusDays(i.toLong())
+                dateRow.add(DateRowClass(date.dayOfMonth.toString(),date.dayOfWeek.name.slice(0..2)))
+            }
+            getTasks(LocalDate.now().toEpochDay())
 
         }
     }
@@ -97,8 +98,11 @@ class MainViewModel @Inject constructor(
 //            }
             is TaskEvent.SearchTasks -> {
                 viewModelScope.launch {
-                    searchTasks(event.query)
+                    searchTasks(tasksUiState.date,event.query)
                 }
+            }
+            is TaskEvent.OnDateChange -> viewModelScope.launch {
+                getTasks(event.date)
             }
             is TaskEvent.UpdateTask -> viewModelScope.launch {
                 if (event.task.title.isBlank())
@@ -125,50 +129,46 @@ class MainViewModel @Inject constructor(
                 taskDetailsUiState = taskDetailsUiState.copy(navigateUp = true)
             }
             is TaskEvent.GetTask -> viewModelScope.launch {
-                taskDetailsUiState = taskDetailsUiState.copy(
-                    task = getTaskUseCase(event.taskId)
-                )
+//                taskDetailsUiState = taskDetailsUiState.copy(
+//                    task = getTaskUseCase(tasksUiState.date,event.taskId)
+//                )
             }
             else -> {}
         }
     }
 
     data class UiState(
-        val goodTasks: List<Task> = emptyList(),
-        val badTasks: List<Task> = emptyList(),
+        val goodTasks: List<TaskWithProgress> = emptyList(),
+        val badTasks: List<TaskWithProgress> = emptyList(),
 
         val taskOrder: Order = Order.DateModified(OrderType.ASC()),
         val showCompletedTasks: Boolean = false,
         val error: String? = null,
+        val date: Long = LocalDate.now().toEpochDay(),
+
         val searchTasks: List<Task> = emptyList()
     )
 
     data class TaskUiState(
-        val task: Task = Task("", "emoji"),
+        val task: Task = Task(title = "", emoji = "emoji"),
         val navigateUp: Boolean = false,
         val error: String? = null
     )
 
-    private fun getTasks(order: Order = Order.DateCreated(), showCompleted: Boolean = true) {
+    private fun getTasks(date: Long ,order: Order = Order.DateCreated(), showCompleted: Boolean = true) {
         getTasksJob?.cancel()
-        getTasksJob = getAllTasks(order)
-            .map { list ->
-                if (showCompleted)
-                    list
-                else
-                    list.filter { !it.isCompleted }
-            }.onEach { tasks ->
+        getTasksJob = getAllTasks(date,order).onEach { tasks ->
                 tasksUiState = tasksUiState.copy(
-                    goodTasks = tasks.filter { it.category },
-                    badTasks = tasks.filter { !it.category },
+                    goodTasks = tasks.filter { it.task.category },
+                    badTasks = tasks.filter { !it.task.category },
                     taskOrder = order,
                     showCompletedTasks = showCompleted
                 )
             }.launchIn(viewModelScope)
     }
-    private fun searchTasks(query: String){
+    private fun searchTasks(date:Long,query: String){
         searchTasksJob?.cancel()
-        searchTasksJob = searchTasksUseCase(query).onEach { tasks ->
+        searchTasksJob = searchTasksUseCase(date,query).onEach { tasks ->
             tasksUiState = tasksUiState.copy(
                 searchTasks = tasks
             )

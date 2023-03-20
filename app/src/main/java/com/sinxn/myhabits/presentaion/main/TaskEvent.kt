@@ -1,6 +1,6 @@
 package com.sinxn.myhabits.presentaion.main
 
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.util.settings.Order
 
 sealed class TaskEvent {
@@ -12,5 +12,7 @@ sealed class TaskEvent {
     data class ShowCompletedTasks(val showCompleted: Boolean) : TaskEvent()
     data class UpdateTask(val task: Task, val dueDateUpdated: Boolean) : TaskEvent()
     data class DeleteTask(val task: Task) : TaskEvent()
+    data class OnDateChange(val date: Long): TaskEvent()
+
     object ErrorDisplayed: TaskEvent()
 }

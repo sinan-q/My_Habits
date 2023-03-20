@@ -1,21 +1,25 @@
 package com.sinxn.myhabits.domain.repository
 
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Progress
+import com.sinxn.myhabits.domain.model.Task
+import com.sinxn.myhabits.domain.model.TaskWithProgress
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
 
-    fun getAllTasks(): Flow<List<Task>>
+    fun getAllTasks(date: Long): Flow<List<TaskWithProgress>>
 
-    suspend fun getTaskById(id: Int): Task
+    suspend fun getTaskById(date: Long,id: Int): Progress
 
-    fun searchTasks(title: String): Flow<List<Task>>
+    fun searchTasks(date: Long,title: String): Flow<List<Task>>
 
     suspend fun insertTask(task: Task): Long
 
+    suspend fun updateTaskProgress(date: Long,task: Task)
+
     suspend fun updateTask(task: Task)
 
-    suspend fun completeTask(id: Int, completed: Boolean)
+    suspend fun completeTask(date: Long,id: Int, completed: Boolean)
 
     suspend fun deleteTask(task: Task)
 

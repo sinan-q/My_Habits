@@ -7,7 +7,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.R
 import com.sinxn.myhabits.app.getString
 import com.sinxn.myhabits.presentaion.main.MainActivity

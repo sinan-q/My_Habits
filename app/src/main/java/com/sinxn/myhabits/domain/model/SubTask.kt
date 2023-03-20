@@ -1,9 +1,14 @@
-package com.mhss.app.mybrain.domain.model
+package com.sinxn.myhabits.domain.model
 
-import java.util.*
+import java.util.UUID
+
 
 data class SubTask(
     val title: String,
-    val isCompleted: Boolean,
     val id: UUID = UUID.randomUUID()
+)
+
+data class SubTaskProgress(
+    val id: UUID,
+    val isCompleted: Boolean
 )

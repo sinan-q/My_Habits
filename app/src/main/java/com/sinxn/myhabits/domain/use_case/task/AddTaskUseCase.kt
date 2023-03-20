@@ -1,6 +1,6 @@
 package com.sinxn.myhabits.domain.use_case.task
 
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.domain.repository.TaskRepository
 import javax.inject.Inject
 

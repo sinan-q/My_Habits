@@ -1,7 +1,10 @@
 package com.sinxn.myhabits.data.repository
 
+import android.util.Log
 import com.sinxn.myhabits.data.local.dao.TaskDao
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Progress
+import com.sinxn.myhabits.domain.model.Task
+import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.domain.repository.TaskRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -13,17 +16,19 @@ class TaskRepositoryImpl(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : TaskRepository {
 
-    override fun getAllTasks(): Flow<List<Task>> {
-        return taskDao.getAllTasks()
+    override fun getAllTasks(date: Long): Flow<List<TaskWithProgress>> {
+        val t = taskDao.getTasksWithProgress(date)
+        Log.d("TAG", "getAllTasks: $t")
+        return t
     }
 
-    override suspend fun getTaskById(id: Int): Task {
+    override suspend fun getTaskById(date: Long, id: Int): Progress {
         return withContext(ioDispatcher) {
-            taskDao.getTask(id)
+            taskDao.getTask(date,id)
         }
     }
 
-    override fun searchTasks(title: String): Flow<List<Task>> {
+    override fun searchTasks(date: Long, title: String): Flow<List<Task>> {
         return taskDao.getTasksByTitle(title)
     }
 
@@ -33,16 +38,20 @@ class TaskRepositoryImpl(
         }
     }
 
+    override suspend fun updateTaskProgress(date: Long, task: Task) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun updateTask(task: Task) {
         withContext(ioDispatcher) {
             taskDao.updateTask(task)
         }
     }
 
-    override suspend fun completeTask(id: Int, completed: Boolean) {
-        withContext(ioDispatcher) {
-            taskDao.updateCompleted(id, completed)
-        }
+    override suspend fun completeTask(date: Long, id: Int, completed: Boolean) {
+//        withContext(ioDispatcher) {
+//            taskDao.updateCompleted(id, completed)
+//        }
     }
 
     override suspend fun deleteTask(task: Task) {

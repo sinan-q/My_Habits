@@ -7,6 +7,6 @@ class UpdateTaskCompletedUseCase @Inject constructor(
     private val tasksRepository: TaskRepository,
 ) {
     suspend operator fun invoke(taskId: Int, completed: Boolean) {
-        tasksRepository.completeTask(taskId, completed)
+       // tasksRepository.completeTask(taskId, completed)
     }
 }

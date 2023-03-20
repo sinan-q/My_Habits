@@ -21,8 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.R
+import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.presentaion.util.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,11 +110,11 @@ fun HomeScreen(
                 Text(
                     text = "See More",
                     fontSize = 16.sp,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline
                 )
             }
             LazyRow(modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)) {
-                items(uiState.goodTasks, key = { it.id }) {task ->
+                items(uiState.goodTasks) {task ->
                     HabitRow(task) }
             }
             Row(modifier = Modifier.fillMaxWidth(),
@@ -135,11 +136,11 @@ fun HomeScreen(
                 Text(
                     text = "See More",
                     fontSize = 16.sp,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline
                 )
             }
             LazyRow() {
-                items(uiState.badTasks, key = { it.id }) { task ->
+                items(uiState.badTasks) { task ->
                     HabitRow(task)
                 }
             }
@@ -147,9 +148,8 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(lazyListState) {
-        lazyListState.animateScrollToItem(lazyListState.layoutInfo.visibleItemsInfo.lastIndex / 2)
-    }
+
+
 }
 
 
@@ -178,7 +178,7 @@ fun DateRow(
 
 @Composable
 fun HabitRow(
-    task: Task
+    taskWithProgress: TaskWithProgress
 ) {
     Box(modifier = Modifier
         .padding(end = 35.dp)
@@ -189,12 +189,12 @@ fun HabitRow(
         Column(modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.55f),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-            Text(text = task.emoji, fontSize = 45.sp)
+            Text(text = taskWithProgress.task.emoji, fontSize = 45.sp)
         }
 
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = task.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = task.isCompleted.toString())
+            Text(text = taskWithProgress.task.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = taskWithProgress.progress?.isCompleted.toString())
         }
     }
 }

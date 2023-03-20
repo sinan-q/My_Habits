@@ -13,14 +13,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.mhss.app.mybrain.domain.model.SubTask
-import com.mhss.app.mybrain.domain.model.Task
 import com.sinxn.myhabits.R
+import com.sinxn.myhabits.domain.model.SubTask
+import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.presentaion.main.MainViewModel
 import com.sinxn.myhabits.presentaion.main.TaskEvent
 import com.sinxn.myhabits.util.settings.Interval
@@ -32,14 +31,14 @@ fun HabitAddScreen(
     navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
 ) {
-    var category by rememberSaveable { mutableStateOf(true) }
 
+    var category by rememberSaveable { mutableStateOf(true) }
     var name by rememberSaveable { mutableStateOf("") }
     var emoji by rememberSaveable { mutableStateOf("\uD83D\uDE42") }
     var interval by rememberSaveable { mutableStateOf(Interval.DAILY) }
-
     var enableRemainder by rememberSaveable { mutableStateOf(false) }
     val subTasks = remember { mutableStateListOf<SubTask>() }
+    val dueDate by remember { mutableStateOf(false) }
 
 
 
@@ -144,14 +143,7 @@ fun HabitAddScreen(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        subTasks.add(
-                            SubTask(
-                                title = "New Subtask",
-                                isCompleted = false,
-                            )
-                        )
-                    },
+                    .clickable { subTasks.add(SubTask(title = "New Subtask")) },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -229,25 +221,13 @@ fun SubTaskItem(
             contentDescription = stringResource(R.string.delete_sub_task),
             modifier = Modifier.clickable { onDelete() }
         )
-        Checkbox(
-            checked = subTask.isCompleted,
-            onCheckedChange = { onChange(subTask.copy(isCompleted = it)) },
-        )
+
         Spacer(Modifier.width(8.dp))
         BasicTextField(
             value = subTask.title,
             onValueChange = {
                 onChange(subTask.copy(title = it))
             },
-            textStyle = if (subTask.isCompleted)
-                TextStyle(
-                    color = LocalContentColor.current,
-                    textDecoration = TextDecoration.LineThrough,
-                )
-            else
-                TextStyle(
-                    color = LocalContentColor.current
-                ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -282,7 +262,6 @@ fun IntervalMenu(
                         onChange(interval)
                         intervalSelected = interval.title
                     })
-
         }
 
     }

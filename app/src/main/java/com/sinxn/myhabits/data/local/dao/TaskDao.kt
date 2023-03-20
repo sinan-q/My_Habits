@@ -1,17 +1,24 @@
 package com.sinxn.myhabits.data.local.dao
 
 import androidx.room.*
-import com.mhss.app.mybrain.domain.model.Task
+import com.sinxn.myhabits.domain.model.Progress
+import com.sinxn.myhabits.domain.model.Task
+import com.sinxn.myhabits.domain.model.TaskWithProgress
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
 
-    @Query("SELECT * FROM tasks")
-    fun getAllTasks(): Flow<List<Task>>
+    @Transaction
+    @Query("SELECT * FROM tasks LEFT  JOIN progress on tasks.id = progress.habit_id AND progress.date = :date")
+    fun getTasksWithProgress(date: Long): Flow<List<TaskWithProgress>>
 
-    @Query("SELECT * FROM tasks WHERE id = :id")
-    suspend fun getTask(id: Int): Task
+
+//    @Query("SELECT * FROM tasks INNER JOIN progress ON tasks.id = progress.habit_id WHERE progress.date = :date")
+//    fun getAllTasks(date: Long): Flow<List<Task>>
+
+    @Query("SELECT * FROM progress WHERE id = :id and date = :date")
+    suspend fun getTask(date:Long, id: Int): Progress
 
     @Query("SELECT * FROM tasks WHERE title LIKE '%' || :title || '%'")
     fun getTasksByTitle(title: String): Flow<List<Task>>
@@ -28,7 +35,7 @@ interface TaskDao {
     @Delete
     suspend fun deleteTask(task: Task)
 
-    @Query("UPDATE tasks SET is_completed = :completed WHERE id = :id")
-    suspend fun updateCompleted(id: Int, completed: Boolean)
+//    @Query("UPDATE tasks SET is_completed = :completed WHERE id = :id")
+//    suspend fun updateCompleted(id: Int, completed: Boolean)
 
 }
