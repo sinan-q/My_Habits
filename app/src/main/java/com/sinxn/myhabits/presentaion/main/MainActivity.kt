@@ -10,11 +10,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
+import com.sinxn.myhabits.presentaion.habitAdd.HabitAddScreen
 import com.sinxn.myhabits.presentaion.util.Screen
 import com.sinxn.myhabits.ui.theme.MyHabitsTheme
+import com.sinxn.myhabits.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,6 +39,11 @@ class MainActivity : ComponentActivity() {
                            MainScreen(
                                startUpScreen = Screen.HomeScreen.route,
                                mainNavController = navController
+                           )
+                       }
+                       composable(Screen.HabitAddScreen.route,) {
+                           HabitAddScreen(
+                               navController = navController
                            )
                        }
                    }

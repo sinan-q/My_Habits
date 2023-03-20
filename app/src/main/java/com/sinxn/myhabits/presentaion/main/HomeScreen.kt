@@ -6,16 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -24,36 +17,46 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.mhss.app.mybrain.domain.model.Task
 import com.sinxn.myhabits.R
+import com.sinxn.myhabits.presentaion.util.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
 ){
+    val uiState = viewModel.tasksUiState
 
     val lazyListState = rememberLazyListState()
 
     Scaffold(
+        modifier = Modifier.padding(bottom = 55.dp),
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = stringResource(R.string.home),
-                        style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold)
                     )
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                elevation = 0.dp
             )
         },
+
+        floatingActionButton =
+        {
+            FloatingActionButton(onClick = { navController.navigate(Screen.HabitAddScreen.route) }){
+                Row(Modifier.padding(horizontal = 15.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painter = painterResource(id = android.R.drawable.ic_input_add), contentDescription = null)
+                    Text(text = "Add Habit")
+                }
+            }
+        }
 
     ) { padding ->
         Column(modifier = Modifier
@@ -110,7 +113,8 @@ fun HomeScreen(
                 )
             }
             LazyRow(modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)) {
-                items(6) { HabitRow() }
+                items(uiState.goodTasks, key = { it.id }) {task ->
+                    HabitRow(task) }
             }
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -135,8 +139,8 @@ fun HomeScreen(
                 )
             }
             LazyRow() {
-                items(6) {
-                    HabitRow()
+                items(uiState.badTasks, key = { it.id }) { task ->
+                    HabitRow(task)
                 }
             }
 
@@ -161,7 +165,9 @@ fun DateRow(
         .size(80.dp)
         .padding(end = 15.dp)
         .clickable { onClick() }, contentAlignment = Alignment.Center ) {
-        if (date == today) modifier.background(color = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer).clip(RoundedCornerShape(16.dp))
+        if (date == today) modifier
+            .background(color = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer)
+            .clip(RoundedCornerShape(16.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally  ) {
             Text(text = dateString, fontSize = 14.sp)
             Text(text = date, fontSize = 14.sp)
@@ -171,7 +177,9 @@ fun DateRow(
 }
 
 @Composable
-fun HabitRow() {
+fun HabitRow(
+    task: Task
+) {
     Box(modifier = Modifier
         .padding(end = 35.dp)
         .width(130.dp)
@@ -181,12 +189,12 @@ fun HabitRow() {
         Column(modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.55f),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-            Text(text = "🥳", fontSize = 45.sp)
+            Text(text = task.emoji, fontSize = 45.sp)
         }
 
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "WorkOut", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = "Completed")
+            Text(text = task.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = task.isCompleted.toString())
         }
     }
 }

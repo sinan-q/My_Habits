@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "tasks")
 data class Task(
     val title: String,
+    val emoji: String,
     @ColumnInfo(name = "is_completed")
     val isCompleted: Boolean = false,
     val category: Boolean = true,
@@ -14,11 +15,11 @@ data class Task(
     val createdDate: Long = 0L,
     @ColumnInfo(name = "updated_date")
     val updatedDate: Long = 0L,
+
     @ColumnInfo(name = "sub_tasks")
     val interval: Int = 0,
-
-    val subTasks: List<SubTask> = emptyList(),
     val remainder: Boolean = false,
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0
+    val id: Int = 0,
+    val subTasks: List<SubTask> = emptyList()
 )

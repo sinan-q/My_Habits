@@ -9,4 +9,12 @@
     <string name="daily">Daily</string>
     <string name="monthly">Monthly</string>
     <string name="weekly">Weekly</string>
+    <string name="error_empty_title">Habit Name is empty</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="alphabetical">Alphabetical</string>
+    <string name="date_created">Date Created</string>
+    <string name="date_modified">Date Modified</string>
+    <string name="interval">Interval</string>
+    <string name="complete">Complete</string>
 </resources>
