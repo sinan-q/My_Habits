@@ -6,7 +6,7 @@ import androidx.room.*
 @Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
     val title: String,
     val emoji: String,
     val category: Boolean = true,
@@ -37,13 +37,13 @@ data class TaskWithProgress(
 )
 data class Progress(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0L,
     @ColumnInfo(name = "habit_id")
-    val habitId:Int = 0,
+    val habitId: Long = 0,
     val date: Long = 0L,
     @ColumnInfo(name = "is_completed")
     val isCompleted: Boolean = false,
-    val subTasks: List<SubTaskProgress> = emptyList(),
+    val subTasks: List<SubTask> = emptyList(),
 
-)
+    )
 

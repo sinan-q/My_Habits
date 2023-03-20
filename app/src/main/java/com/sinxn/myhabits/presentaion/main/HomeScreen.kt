@@ -1,6 +1,7 @@
 package com.sinxn.myhabits.presentaion.main
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,8 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,10 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.R
+import com.sinxn.myhabits.domain.model.SubTask
 import com.sinxn.myhabits.domain.model.TaskWithProgress
+import com.sinxn.myhabits.presentaion.main.components.CompleteDialogContent
 import com.sinxn.myhabits.presentaion.util.Screen
+import com.sinxn.myhabits.util.settings.Interval
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -34,6 +37,19 @@ fun HomeScreen(
     viewModel: MainViewModel = hiltViewModel()
 ){
     val uiState = viewModel.tasksUiState
+    val uiTaskState = viewModel.taskDetailsUiState
+
+    var openDialog by rememberSaveable { mutableStateOf(false) }
+
+    var title by rememberSaveable { mutableStateOf("") }
+    var description by rememberSaveable { mutableStateOf("") }
+    var priority by rememberSaveable { mutableStateOf(Interval.DAILY) }
+    var dueDate by rememberSaveable { mutableStateOf(0L) }
+    var dueDateExists by rememberSaveable { mutableStateOf(false) }
+    var completed by rememberSaveable { mutableStateOf(false) }
+    val subTasks = remember { mutableStateListOf<SubTask>() }
+
+
 
     val lazyListState = rememberLazyListState()
 
@@ -115,7 +131,10 @@ fun HomeScreen(
             }
             LazyRow(modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)) {
                 items(uiState.goodTasks) {task ->
-                    HabitRow(task) }
+                    HabitRow(task) {
+                        openDialog=true
+                        viewModel.onEvent(TaskEvent.GetTask(it))
+                    } }
             }
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -141,12 +160,24 @@ fun HomeScreen(
             }
             LazyRow() {
                 items(uiState.badTasks) { task ->
-                    HabitRow(task)
+                    HabitRow(task) {
+                        openDialog=true
+                        viewModel.onEvent(TaskEvent.GetTask(it))
+                    }
+
                 }
             }
+            if (openDialog)
+                CompleteDialogContent(
+                    task = viewModel.taskDetailsUiState.task
+                ) { openDialog = false
+                    Log.d("TAG", "HomeScreen: ${it.subTasks.size}")
+                    viewModel.onEvent(TaskEvent.UpdateProgress(it))
+                    }
 
         }
     }
+
 
 
 
@@ -161,12 +192,13 @@ fun DateRow(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+
     Box(modifier = Modifier
         .size(80.dp)
         .padding(end = 15.dp)
         .clickable { onClick() }, contentAlignment = Alignment.Center ) {
         if (date == today) modifier
-            .background(color = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer)
+            .background(color = MaterialTheme.colorScheme.primaryContainer)
             .clip(RoundedCornerShape(16.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally  ) {
             Text(text = dateString, fontSize = 14.sp)
@@ -178,12 +210,16 @@ fun DateRow(
 
 @Composable
 fun HabitRow(
-    taskWithProgress: TaskWithProgress
+    taskWithProgress: TaskWithProgress,
+    onClick: (Long) -> Unit
+
 ) {
+
     Box(modifier = Modifier
         .padding(end = 35.dp)
         .width(130.dp)
         .height(150.dp)
+        .clickable { onClick(taskWithProgress.task.id) }
     )
     {
         Column(modifier = Modifier
@@ -194,7 +230,7 @@ fun HabitRow(
 
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = taskWithProgress.task.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = taskWithProgress.progress?.isCompleted.toString())
+            Text(text = taskWithProgress.task.id.toString())
         }
     }
 }

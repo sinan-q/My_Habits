@@ -22,11 +22,11 @@ class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         runBlocking {
-            val task = intent?.getIntExtra(Constants.TASK_ID_EXTRA, 0)?.let { getTaskByIdUseCase(LocalDate.now().toEpochDay(),it) }
+            val task = intent?.getIntExtra(Constants.TASK_ID_EXTRA, 0)?.let { getTaskByIdUseCase(LocalDate.now().toEpochDay(),it.toLong()) }
             task?.let {
                 val manager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 //manager.sendNotification(task, context, task.id)
-                deleteAlarmUseCase(task.id)
+                deleteAlarmUseCase(task.task.id)
             }
         }
     }

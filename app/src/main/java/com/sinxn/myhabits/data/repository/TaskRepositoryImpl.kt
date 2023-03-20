@@ -17,14 +17,13 @@ class TaskRepositoryImpl(
 ) : TaskRepository {
 
     override fun getAllTasks(date: Long): Flow<List<TaskWithProgress>> {
-        val t = taskDao.getTasksWithProgress(date)
-        Log.d("TAG", "getAllTasks: $t")
-        return t
+        return taskDao.getTasksWithProgress()
     }
 
-    override suspend fun getTaskById(date: Long, id: Int): Progress {
+    override suspend fun getTaskById(date: Long, id: Long): TaskWithProgress {
         return withContext(ioDispatcher) {
-            taskDao.getTask(date,id)
+            Log.d("TAG", "getTaskById: ${taskDao.getTask(id)}")
+            taskDao.getTask(id)
         }
     }
 
@@ -38,9 +37,11 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun updateTaskProgress(date: Long, task: Task) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun updateTaskProgress(progress: Progress) {
+        withContext(ioDispatcher) {
+            Log.d("TAG", "updateTaskProgress: ${progress.subTasks.size}")
+            taskDao.updateProgress(progress)
+        }    }
 
     override suspend fun updateTask(task: Task) {
         withContext(ioDispatcher) {

@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.R
 import com.sinxn.myhabits.app.getString
 import com.sinxn.myhabits.domain.model.Alarm
+import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.domain.use_case.alarm.AddAlarmUseCase
 import com.sinxn.myhabits.domain.use_case.alarm.DeleteAlarmUseCase
@@ -18,7 +18,6 @@ import com.sinxn.myhabits.util.settings.OrderType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -32,6 +31,8 @@ class MainViewModel @Inject constructor(
     private val getAllTasks: GetAllTasksUseCase,
     private val getTaskUseCase: GetTaskByIdUseCase,
     private val updateTask: UpdateTaskUseCase,
+    private val updateProgress: UpdateProgressUseCase,
+
     private val completeTask: UpdateTaskCompletedUseCase,
     private val deleteTask: DeleteTaskUseCase,
     private val searchTasksUseCase: SearchTasksUseCase,
@@ -104,6 +105,10 @@ class MainViewModel @Inject constructor(
             is TaskEvent.OnDateChange -> viewModelScope.launch {
                 getTasks(event.date)
             }
+            is TaskEvent.UpdateProgress -> viewModelScope.launch {
+                Log.d("TAG", "onEvent: ${event.progress.subTasks.size}")
+                updateProgress(event.progress)
+            }
             is TaskEvent.UpdateTask -> viewModelScope.launch {
                 if (event.task.title.isBlank())
                     taskDetailsUiState = taskDetailsUiState.copy(error = getString(R.string.error_empty_title))
@@ -129,9 +134,9 @@ class MainViewModel @Inject constructor(
                 taskDetailsUiState = taskDetailsUiState.copy(navigateUp = true)
             }
             is TaskEvent.GetTask -> viewModelScope.launch {
-//                taskDetailsUiState = taskDetailsUiState.copy(
-//                    task = getTaskUseCase(tasksUiState.date,event.taskId)
-//                )
+                taskDetailsUiState = taskDetailsUiState.copy(
+                    task = getTaskUseCase(tasksUiState.date,event.taskId)
+                )
             }
             else -> {}
         }
@@ -150,14 +155,16 @@ class MainViewModel @Inject constructor(
     )
 
     data class TaskUiState(
-        val task: Task = Task(title = "", emoji = "emoji"),
+        val task: TaskWithProgress = TaskWithProgress(task = Task(title = "", emoji = ""),progress = null),
         val navigateUp: Boolean = false,
         val error: String? = null
     )
 
     private fun getTasks(date: Long ,order: Order = Order.DateCreated(), showCompleted: Boolean = true) {
         getTasksJob?.cancel()
-        getTasksJob = getAllTasks(date,order).onEach { tasks ->
+        getTasksJob = getAllTasks(date,order)
+            .onEach { tasks ->
+
                 tasksUiState = tasksUiState.copy(
                     goodTasks = tasks.filter { it.task.category },
                     badTasks = tasks.filter { !it.task.category },

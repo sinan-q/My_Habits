@@ -20,7 +20,7 @@ class TaskActionButtonBroadcastReceiver : BroadcastReceiver() {
         if (intent?.action == Constants.ACTION_COMPLETE) {
             runBlocking {
                 val taskId = intent.getIntExtra(Constants.TASK_ID_EXTRA, 0)
-                updateTaskCompleted(taskId, true)
+                updateTaskCompleted(taskId.toLong(), true)
                 val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.cancel(taskId)
             }

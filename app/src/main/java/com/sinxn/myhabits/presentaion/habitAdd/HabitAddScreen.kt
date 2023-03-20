@@ -40,9 +40,6 @@ fun HabitAddScreen(
     val subTasks = remember { mutableStateListOf<SubTask>() }
     val dueDate by remember { mutableStateOf(false) }
 
-
-
-
     Scaffold(
         topBar = {
             TopAppBar(
