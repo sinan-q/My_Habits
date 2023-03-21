@@ -208,15 +208,16 @@ fun DateRow(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-
-    Box(modifier = Modifier
+    val modifer = if (dateString == today) Modifier
+        .background(color = MaterialTheme.colorScheme.primaryContainer)
+        .clip(RoundedCornerShape(16.dp)) else Modifier
+    Box(modifier = modifer
         .size(80.dp)
         .padding(end = 15.dp)
-        .clickable { onClick() }, contentAlignment = Alignment.Center ) {
-        if (date == today) modifier
-            .background(color = MaterialTheme.colorScheme.primaryContainer)
-            .clip(RoundedCornerShape(16.dp))
-        Column(horizontalAlignment = Alignment.CenterHorizontally  ) {
+        .clickable { onClick() }, contentAlignment = Alignment.Center
+    ) {
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = dateString, fontSize = 14.sp)
             Text(text = date, fontSize = 14.sp)
         }
