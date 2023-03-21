@@ -3,6 +3,8 @@ package com.sinxn.myhabits.presentaion.habitAdd
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,6 +24,9 @@ import com.sinxn.myhabits.domain.model.SubTask
 import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.presentaion.main.MainViewModel
 import com.sinxn.myhabits.presentaion.main.TaskEvent
+import com.sinxn.myhabits.presentaion.util.Screen
+import com.sinxn.myhabits.util.Constants.collapsedTextSize
+import com.sinxn.myhabits.util.Constants.expandedTextSize
 import com.sinxn.myhabits.util.settings.Interval
 import com.sinxn.myhabits.util.settings.toInt
 
@@ -29,72 +34,109 @@ import com.sinxn.myhabits.util.settings.toInt
 @Composable
 fun HabitAddScreen(
     navController: NavController,
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
 ) {
 
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    var mDisplayMenu by remember { mutableStateOf(false) }
+
+    val topPaddddingmodifier = Modifier.padding(top = 15.dp)
     var category by rememberSaveable { mutableStateOf(true) }
     var name by rememberSaveable { mutableStateOf("") }
     var emoji by rememberSaveable { mutableStateOf("\uD83D\uDE42") }
     var interval by rememberSaveable { mutableStateOf(Interval.DAILY) }
     var enableRemainder by rememberSaveable { mutableStateOf(false) }
     val subTasks = remember { mutableStateListOf<SubTask>() }
-    val dueDate by remember { mutableStateOf(false) }
+    // val dueDate by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "")
+                    }
+                    DropdownMenu(
+                        expanded = mDisplayMenu,
+                        onDismissRequest = { mDisplayMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Settings") },
+                            onClick = {
+                                navController.navigate(Screen.SettingsScreen.route)
+                            })
+                    }
+
+                },
                 title = {
                     Text(
-                        text = stringResource(R.string.dashboard),
-                        style = MaterialTheme.typography.headlineLarge
+                        text = stringResource(R.string.create_habit),
+                        fontSize = (collapsedTextSize + (expandedTextSize - collapsedTextSize) * (1 - scrollBehavior.state.collapsedFraction)).sp
                     )
                 },
             )
         }
     ) { padding ->
-        // LaunchedEffect(true) { viewModel.onDashboardEvent(DashboardEvent.InitAll) }
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(start = 15.dp, end = 15.dp)
+                .padding(horizontal = 15.dp)
         )
         {
             Text(
+                modifier = topPaddddingmodifier.padding(bottom = 15.dp),
                 text = "Enter Habit Name",
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 18.sp,
             )
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 modifier = Modifier.fillMaxWidth()
             )
-            Row(Modifier.padding(top = 15.dp)) {
+            Row(topPaddddingmodifier) {
+                Text(
+                    modifier = topPaddddingmodifier.weight(1f),
+                    text = "Category",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                )
                 Button(
                     modifier = Modifier.padding(start = 15.dp),
                     onClick = { category = true },
+                    shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = if (category) MaterialTheme.colorScheme.primary else Color.Unspecified)
                 ) {
-                    Text(modifier = Modifier.padding(15.dp), text = "Do")
+                    Text(
+                        modifier = Modifier.padding(5.dp), text = "Do",
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                        color = if (category) Color.Unspecified else MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
                 Button(
                     modifier = Modifier.padding(start = 15.dp),
-
+                    shape = MaterialTheme.shapes.medium,
                     onClick = { category = false },
                     colors = ButtonDefaults.buttonColors(containerColor = if (!category) MaterialTheme.colorScheme.primary else Color.Unspecified)
                 ) {
-                    Text(modifier = Modifier.padding(15.dp), text = "Don't")
+                    Text(
+                        modifier = Modifier.padding(5.dp), text = "Don't",
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                        color = if (!category) Color.Unspecified else MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 15.dp),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
+                    modifier = topPaddddingmodifier,
                     text = "Select Emoji",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
@@ -109,9 +151,7 @@ fun HabitAddScreen(
 
             }
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 15.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -124,6 +164,7 @@ fun HabitAddScreen(
             }
 
             Text(
+                modifier = topPaddddingmodifier,
                 text = "Subtasks",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
@@ -151,12 +192,12 @@ fun HabitAddScreen(
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 15.dp),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
+                    modifier = topPaddddingmodifier,
                     text = "Enable Reminder",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
@@ -168,35 +209,49 @@ fun HabitAddScreen(
 
         }
         Row(
-            modifier = Modifier.fillMaxSize().padding(bottom = 50.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 50.dp, horizontal = 15.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Bottom
         ) {
-            Button(
-                onClick = { /*TODO*/ },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            OutlinedButton(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 5.dp),
+                onClick = {
+                    navController.popBackStack()
+                },
+                shape = MaterialTheme.shapes.medium,
             ) {
-                Text(text = "Cancel")
+                Text(text = "Cancel", fontSize = MaterialTheme.typography.titleLarge.fontSize)
             }
             Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 5.dp),
+
                 onClick = {
                     viewModel.onEvent(
                         TaskEvent.AddTask(
-                        Task(
-                            title = name,
-                            category = category,
-                            interval = interval.toInt(),
-                            emoji = emoji,
-                            createdDate = System.currentTimeMillis(),
-                            updatedDate = System.currentTimeMillis(),
-                            subTasks = subTasks.toList(),
-                            remainder = enableRemainder
+                            Task(
+                                title = name,
+                                category = category,
+                                interval = interval.toInt(),
+                                emoji = emoji,
+                                createdDate = System.currentTimeMillis(),
+                                updatedDate = System.currentTimeMillis(),
+                                subTasks = subTasks.toList(),
+                                remainder = enableRemainder
+                            )
                         )
-                    ))
+                    )
+                    navController.popBackStack()
                 },
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text(text = "Save")
+                Text(text = "Save", fontSize = MaterialTheme.typography.titleLarge.fontSize)
             }
         }
     }

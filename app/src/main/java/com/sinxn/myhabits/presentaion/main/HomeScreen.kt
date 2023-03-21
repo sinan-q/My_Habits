@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,6 +28,7 @@ import com.sinxn.myhabits.R
 import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.presentaion.main.components.CompleteDialogContent
 import com.sinxn.myhabits.presentaion.util.Screen
+import com.sinxn.myhabits.util.Constants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -33,18 +36,39 @@ import com.sinxn.myhabits.presentaion.util.Screen
 fun HomeScreen(
     navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
-){
+) {
     val uiState = viewModel.tasksUiState
     var openDialog by rememberSaveable { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    var mDisplayMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.padding(bottom = 55.dp),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "")
+                    }
+                    DropdownMenu(
+                        expanded = mDisplayMenu,
+                        onDismissRequest = { mDisplayMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Settings") },
+                            onClick = {
+                                navController.navigate(Screen.SettingsScreen.route)
+                            })
+                    }
+
+                },
                 title = {
                     Text(
                         text = stringResource(R.string.home),
+                        fontSize = (Constants.collapsedTextSize + (Constants.expandedTextSize - Constants.collapsedTextSize) * (1 - scrollBehavior.state.collapsedFraction)).sp
                     )
                 },
             )
@@ -135,7 +159,11 @@ fun HomeScreen(
                         fontSize = 16.sp
                     )
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(painter = painterResource(id = android.R.drawable.presence_invisible), contentDescription = null,modifier = Modifier.size(24.dp))
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.presence_invisible),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
 
@@ -145,11 +173,11 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.outline
                 )
             }
-            LazyRow() {
+            LazyRow {
                 items(uiState.badTasks) { task ->
                     HabitRow({ task }) { it ->
 
-                        openDialog=true
+                        openDialog = true
                         viewModel.onEvent(TaskEvent.SetTask(task = it))
                     }
 

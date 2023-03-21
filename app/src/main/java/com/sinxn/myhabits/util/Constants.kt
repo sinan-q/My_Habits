@@ -15,6 +15,9 @@ object Constants {
     const val TASK_ID_ARG = "task_id"
     const val TASK_DETAILS_URI = "app://com.sinxn.myhabits/task_details"
 
+    //TopAppBar
+    const val collapsedTextSize = 16
+    const val expandedTextSize = 28
 
 
 }
