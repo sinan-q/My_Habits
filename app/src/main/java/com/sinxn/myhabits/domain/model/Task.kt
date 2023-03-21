@@ -6,6 +6,25 @@ import androidx.room.*
 @Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    val habitId: Long = 0,
+    val title: String,
+    val emoji: String,
+    val category: Boolean = true,
+    @ColumnInfo(name = "created_date")
+    val createdDate: Long = 0L,
+    @ColumnInfo(name = "updated_date")
+    val updatedDate: Long = 0L,
+    @ColumnInfo(name = "sub_tasks")
+    val subTasks: List<SubTask> = emptyList(),
+    val interval: Int = 0,
+    val remainder: Boolean = false,
+
+
+)
+
+data class TaskWithProgress(
+    @ColumnInfo(name = "id")
     val id: Long = 0,
     val title: String,
     val emoji: String,
@@ -14,21 +33,11 @@ data class Task(
     val createdDate: Long = 0L,
     @ColumnInfo(name = "updated_date")
     val updatedDate: Long = 0L,
-    val subTasks: List<SubTask> = emptyList(),
     @ColumnInfo(name = "sub_tasks")
+    val subTasks: List<SubTask> = emptyList(),
     val interval: Int = 0,
     val remainder: Boolean = false,
-
-
-)
-
-data class TaskWithProgress(
-    @Embedded val task: Task,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "habit_id"
-    )
-    val progress: Progress?
+    @Embedded var progress: Progress?
 )
 
 @Entity(
@@ -37,6 +46,7 @@ data class TaskWithProgress(
 )
 data class Progress(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "progress_id")
     val id: Long = 0L,
     @ColumnInfo(name = "habit_id")
     val habitId: Long = 0,

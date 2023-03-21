@@ -15,48 +15,33 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.sinxn.myhabits.domain.model.Progress
 import com.sinxn.myhabits.domain.model.SubTask
-import com.sinxn.myhabits.domain.model.TaskWithProgress
-import com.sinxn.myhabits.util.settings.Interval
-import com.sinxn.myhabits.util.settings.toInterval
+import com.sinxn.myhabits.presentaion.main.MainViewModel
 import java.time.LocalDate
 
 
 @Composable
 fun CompleteDialogContent(
-    task: TaskWithProgress,
+    task: MainViewModel.TaskUiState,
     dialogDismiss: (Progress) -> Unit,
 ) {
     var id by rememberSaveable { mutableStateOf(0L) }
-    var title by rememberSaveable { mutableStateOf("") }
-    var description by rememberSaveable { mutableStateOf("") }
-    var priority by rememberSaveable { mutableStateOf(Interval.DAILY) }
-    var dueDate by rememberSaveable { mutableStateOf(0L) }
-    var dueDateExists by rememberSaveable { mutableStateOf(false) }
+    var habitId by rememberSaveable { mutableStateOf(0L) }
+
     var completed by rememberSaveable { mutableStateOf(false) }
     val subTasks = remember { mutableStateListOf<SubTask>() }
 
     LaunchedEffect(task) {
-        title = task.task.title
-        description = task.task.emoji
-        priority = task.task.interval.toInterval()
-        dueDateExists = task.task.remainder
-        id = task.task.id
+        id = task.progress.habitId
         subTasks.clear()
-        if (task.progress == null) {
-            completed = false
-            subTasks.addAll(task.task.subTasks.toMutableList())
-        }
-        else{
-            Log.d("TAG", "1: ${task.progress.subTasks.size}")
-
-            completed = task.progress.isCompleted
-            subTasks.addAll(task.progress.subTasks)
-        }
+        habitId = task.progress.id
+        completed = task.progress.isCompleted
+        subTasks.addAll(task.progress.subTasks)
     }
     Dialog(
         onDismissRequest = {
-            Log.d("TAG", "2: ${subTasks.size}")
-            dialogDismiss(Progress(habitId = id,date = LocalDate.now().toEpochDay() , subTasks = subTasks.toList()))
+            if (subTasks.size == subTasks.filter { it.isCompleted }.size) completed = true
+            dialogDismiss(
+                Progress(id = habitId,habitId = id,date = LocalDate.now().toEpochDay() , isCompleted = completed, subTasks = subTasks.toList()))
                            },
         properties = DialogProperties(
             dismissOnBackPress = true,

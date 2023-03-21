@@ -1,5 +1,4 @@
 package com.sinxn.myhabits.presentaion.main
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.sinxn.myhabits.R
 import com.sinxn.myhabits.app.getString
 import com.sinxn.myhabits.domain.model.Alarm
+import com.sinxn.myhabits.domain.model.Progress
 import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.domain.use_case.alarm.AddAlarmUseCase
@@ -77,9 +77,9 @@ class MainViewModel @Inject constructor(
             }
 
             is TaskEvent.CompleteTask -> viewModelScope.launch {
-                completeTask(event.task.id, event.complete)
+                completeTask(event.task.habitId, event.complete)
                 if (event.complete)
-                    deleteAlarm(event.task.id)
+                    deleteAlarm(event.task.habitId)
             }
             TaskEvent.ErrorDisplayed -> {
                 tasksUiState = tasksUiState.copy(error = null)
@@ -103,10 +103,10 @@ class MainViewModel @Inject constructor(
                 }
             }
             is TaskEvent.OnDateChange -> viewModelScope.launch {
+                tasksUiState = tasksUiState.copy(date = event.date)
                 getTasks(event.date)
             }
             is TaskEvent.UpdateProgress -> viewModelScope.launch {
-                Log.d("TAG", "onEvent: ${event.progress.subTasks.size}")
                 updateProgress(event.progress)
             }
             is TaskEvent.UpdateTask -> viewModelScope.launch {
@@ -129,11 +129,15 @@ class MainViewModel @Inject constructor(
             }
             is TaskEvent.DeleteTask -> viewModelScope.launch {
                 deleteTask(event.task)
-                if (event.task.remainder) deleteAlarm(event.task.id)
+                if (event.task.remainder) deleteAlarm(event.task.habitId)
             }
-            is TaskEvent.GetTask -> viewModelScope.launch {
+            is TaskEvent.SetTask -> viewModelScope.launch {
+
                 taskDetailsUiState = taskDetailsUiState.copy(
-                    task = event.task
+                    title = event.task.title,
+                    emoji = event.task.emoji,
+                    progress = event.task.progress?: Progress(date = tasksUiState.date, habitId = event.task.id, subTasks = event.task.subTasks)
+
                 )
             }
             else -> {}
@@ -153,7 +157,9 @@ class MainViewModel @Inject constructor(
     )
 
     data class TaskUiState(
-        val task: TaskWithProgress = TaskWithProgress(task = Task(title = "", emoji = ""),progress = null),
+        val title: String = "",
+        val emoji: String = "",
+        val progress: Progress = Progress(),
         val error: String? = null
     )
 
@@ -163,8 +169,8 @@ class MainViewModel @Inject constructor(
             .onEach { tasks ->
 
                 tasksUiState = tasksUiState.copy(
-                    goodTasks = tasks.filter { it.task.category },
-                    badTasks = tasks.filter { !it.task.category },
+                    goodTasks = tasks.filter { it.category },
+                    badTasks = tasks.filter { !it.category },
                     taskOrder = order,
                     showCompletedTasks = showCompleted
                 )

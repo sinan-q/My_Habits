@@ -16,19 +16,19 @@ import com.sinxn.myhabits.util.Constants
 fun NotificationManager.sendNotification(task: Task, context: Context, id: Int) {
     val completeIntent = Intent(context, TaskActionButtonBroadcastReceiver::class.java).apply {
         action = Constants.ACTION_COMPLETE
-        putExtra(Constants.TASK_ID_EXTRA, task.id)
+        putExtra(Constants.TASK_ID_EXTRA, task.habitId)
     }
     val completePendingIntent: PendingIntent =
         PendingIntent.getBroadcast(
             context,
-            task.id.toInt(),
+            task.habitId.toInt(),
             completeIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
     val taskDetailIntent = Intent(
         Intent.ACTION_VIEW,
-        "${Constants.TASK_DETAILS_URI}/${task.id}".toUri(),
+        "${Constants.TASK_DETAILS_URI}/${task.habitId}".toUri(),
         context,
         MainActivity::class.java
     )

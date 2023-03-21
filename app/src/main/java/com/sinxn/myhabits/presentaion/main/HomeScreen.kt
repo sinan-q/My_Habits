@@ -23,11 +23,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.sinxn.myhabits.R
-import com.sinxn.myhabits.domain.model.SubTask
 import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.presentaion.main.components.CompleteDialogContent
 import com.sinxn.myhabits.presentaion.util.Screen
-import com.sinxn.myhabits.util.settings.Interval
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -37,20 +35,7 @@ fun HomeScreen(
     viewModel: MainViewModel = hiltViewModel()
 ){
     val uiState = viewModel.tasksUiState
-    val uiTaskState = viewModel.taskDetailsUiState
-
     var openDialog by rememberSaveable { mutableStateOf(false) }
-
-    var title by rememberSaveable { mutableStateOf("") }
-    var description by rememberSaveable { mutableStateOf("") }
-    var priority by rememberSaveable { mutableStateOf(Interval.DAILY) }
-    var dueDate by rememberSaveable { mutableStateOf(0L) }
-    var dueDateExists by rememberSaveable { mutableStateOf(false) }
-    var completed by rememberSaveable { mutableStateOf(false) }
-    val subTasks = remember { mutableStateListOf<SubTask>() }
-
-
-
     val lazyListState = rememberLazyListState()
 
     Scaffold(
@@ -131,10 +116,11 @@ fun HomeScreen(
             }
             LazyRow(modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)) {
                 items(uiState.goodTasks) {task ->
-                    HabitRow(task) {id ->
+                    HabitRow({ task }) {it ->
+
                         openDialog=true
-                        uiState.goodTasks.find { it.task.id == id}
-                            ?.let { TaskEvent.GetTask(task = it) }?.let { viewModel.onEvent(it) } }
+                        viewModel.onEvent(TaskEvent.SetTask(task = it))
+                    }
                     }
             }
             Row(modifier = Modifier.fillMaxWidth(),
@@ -161,16 +147,17 @@ fun HomeScreen(
             }
             LazyRow() {
                 items(uiState.badTasks) { task ->
-                    HabitRow(task) { id ->
+                    HabitRow({ task }) { it ->
+
                         openDialog=true
-                        uiState.badTasks.find { it.task.id == id}
-                            ?.let { TaskEvent.GetTask(task = it) }?.let { viewModel.onEvent(it) } }
+                        viewModel.onEvent(TaskEvent.SetTask(task = it))
+                    }
 
                 }
             }
             if (openDialog)
                 CompleteDialogContent(
-                    task = viewModel.taskDetailsUiState.task
+                    task = viewModel.taskDetailsUiState
                 ) { openDialog = false
                     Log.d("TAG", "HomeScreen: ${it.subTasks.size}")
                     viewModel.onEvent(TaskEvent.UpdateProgress(it))
@@ -211,29 +198,31 @@ fun DateRow(
 
 @Composable
 fun HabitRow(
-    taskWithProgress: TaskWithProgress,
-    onClick: (Long) -> Unit
+    taskWithProgress: () -> (TaskWithProgress),
+    onClick: (TaskWithProgress) -> Unit
 
 ) {
+    val total = (taskWithProgress().subTasks.size)
 
-    val progress = "${if (taskWithProgress.progress != null) taskWithProgress.progress.subTasks.filter { it.isCompleted }.size else "0"} / ${taskWithProgress.task.subTasks.size}"
+    val progress = (taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?:0)
+    val progressText = if (total!=0) "$progress/$total" else if (progress==0) "" else "Completed"
 
     Box(modifier = Modifier
         .padding(end = 35.dp)
         .width(130.dp)
         .height(150.dp)
-        .clickable { onClick(taskWithProgress.task.id) }
+        .clickable { onClick(taskWithProgress()) }
     )
     {
         Column(modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.55f),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-            Text(text = taskWithProgress.task.emoji, fontSize = 45.sp)
+            Text(text = taskWithProgress().emoji, fontSize = 45.sp)
         }
 
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = taskWithProgress.task.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = progress)
+            Text(text = taskWithProgress().title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = progressText)
         }
     }
 }

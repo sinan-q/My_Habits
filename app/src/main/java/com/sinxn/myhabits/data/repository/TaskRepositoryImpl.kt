@@ -17,7 +17,7 @@ class TaskRepositoryImpl(
 ) : TaskRepository {
 
     override fun getAllTasks(date: Long): Flow<List<TaskWithProgress>> {
-        return taskDao.getTasksWithProgress()
+        return taskDao.getTasksWithProgress(date)
     }
 
     override suspend fun getTaskById(date: Long, id: Long): TaskWithProgress {

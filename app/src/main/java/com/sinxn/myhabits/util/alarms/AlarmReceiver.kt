@@ -26,7 +26,7 @@ class AlarmReceiver : BroadcastReceiver() {
             task?.let {
                 val manager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 //manager.sendNotification(task, context, task.id)
-                deleteAlarmUseCase(task.task.id)
+                deleteAlarmUseCase(task.id)
             }
         }
     }

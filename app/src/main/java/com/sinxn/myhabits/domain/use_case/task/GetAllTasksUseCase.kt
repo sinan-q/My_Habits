@@ -17,18 +17,18 @@ class GetAllTasksUseCase @Inject constructor(
             when (order.orderType) {
                 is OrderType.ASC -> {
                     when (order) {
-                        is Order.Alphabetical -> tasks.sortedBy { it.task.title }
-                        is Order.DateCreated -> tasks.sortedBy { it.task.createdDate }
-                        is Order.DateModified -> tasks.sortedBy { it.task.updatedDate }
-                        is Order.Interval -> tasks.sortedBy { it.task.interval }
+                        is Order.Alphabetical -> tasks.sortedBy { it.title }
+                        is Order.DateCreated -> tasks.sortedBy { it.createdDate }
+                        is Order.DateModified -> tasks.sortedBy { it.updatedDate }
+                        is Order.Interval -> tasks.sortedBy { it.interval }
                     }
                 }
                 is OrderType.DESC -> {
                     when (order) {
-                        is Order.Alphabetical -> tasks.sortedByDescending { it.task.title }
-                        is Order.DateCreated -> tasks.sortedByDescending { it.task.createdDate }
-                        is Order.DateModified -> tasks.sortedByDescending { it.task.updatedDate }
-                        is Order.Interval -> tasks.sortedByDescending { it.task.interval }
+                        is Order.Alphabetical -> tasks.sortedByDescending { it.title }
+                        is Order.DateCreated -> tasks.sortedByDescending { it.createdDate }
+                        is Order.DateModified -> tasks.sortedByDescending { it.updatedDate }
+                        is Order.Interval -> tasks.sortedByDescending { it.interval }
                     }
                 }
             }

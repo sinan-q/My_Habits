@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 interface TaskDao {
 
     @Transaction
-    @Query("SELECT * FROM tasks ")
-    fun getTasksWithProgress(): Flow<List<TaskWithProgress>>
+    @Query("SELECT * FROM tasks LEFT JOIN progress ON tasks.id = progress.habit_id WHERE progress.date = :date OR progress.date IS NULL")
+    fun getTasksWithProgress(date: Long): Flow<List<TaskWithProgress>>
 
 
 //    @Query("SELECT * FROM tasks INNER JOIN progress ON tasks.id = progress.habit_id WHERE progress.date = :date")
@@ -27,7 +27,7 @@ interface TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: Task): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun updateProgress(progress: Progress): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
