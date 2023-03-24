@@ -10,7 +10,11 @@ import kotlinx.coroutines.flow.Flow
 interface TaskDao {
 
     @Transaction
-    @Query("SELECT * FROM tasks LEFT JOIN progress ON tasks.id = progress.habit_id WHERE progress.date = :date OR progress.date IS NULL")
+    @Query(
+        "SELECT * \n" +
+                "FROM tasks \n" +
+                "LEFT OUTER JOIN progress ON tasks.id = progress.habit_id AND progress.date = :date"
+    )
     fun getTasksWithProgress(date: Long): Flow<List<TaskWithProgress>>
 
 
