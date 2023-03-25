@@ -1,10 +1,7 @@
 package com.sinxn.myhabits.presentaion.main
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -18,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,7 +48,9 @@ fun HomeScreen(
     var mDisplayMenu by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier.padding(bottom = 55.dp),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .padding(bottom = 55.dp),
         topBar = {
             LargeTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -84,14 +84,21 @@ fun HomeScreen(
         {
             FloatingActionButton(onClick = { navController.navigate(Screen.HabitAddScreen.route) }){
                 Row(Modifier.padding(horizontal = 15.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painter = painterResource(id = android.R.drawable.ic_input_add), contentDescription = null)
-                    Text(text = "Add Habit")
+                    Icon(
+                        painter = painterResource(id = android.R.drawable.ic_input_add),
+                        contentDescription = null
+                    )
+                    Text(
+                        text = "Add Habit", style = MaterialTheme.typography.headlineSmall
+                    )
                 }
             }
         }
 
     ) { padding ->
         Column(modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(padding)
             .padding(start = 15.dp, end = 15.dp)) {
             Spacer(modifier = Modifier.height(30.dp))
@@ -115,13 +122,15 @@ fun HomeScreen(
                     fontSize = 16.sp
                 )
                 IconButton(onClick = { /*TODO*/ }) {
-                    Icon(painter = painterResource(android.R.drawable.ic_menu_my_calendar),
+                    Icon(
+                        painter = painterResource(android.R.drawable.ic_menu_my_calendar),
                         contentDescription = "Calendar Icon",
-                        modifier = Modifier.size(24.dp))
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
 
             }
-            LazyRow(state = lazyListState,horizontalArrangement = Arrangement.Center) {
+            LazyRow(state = lazyListState, horizontalArrangement = Arrangement.Center) {
                 items(viewModel.dateRow) { item ->
                     DateRow(item, uiState.date,
                         onClick = {
@@ -130,8 +139,12 @@ fun HomeScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(15.dp))
-            Row(modifier = Modifier.fillMaxWidth(),
+            Spacer(modifier = Modifier.height(5.dp))
+            Divider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 15.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             )
@@ -285,7 +298,7 @@ fun HabitRow(
 
     Box(modifier = Modifier
         .padding(end = 35.dp)
-        .width(130.dp)
+        .width(100.dp)
         .height(150.dp)
         .combinedClickable(onClick = { onClick() },
             onLongClick = { onLongClick() })

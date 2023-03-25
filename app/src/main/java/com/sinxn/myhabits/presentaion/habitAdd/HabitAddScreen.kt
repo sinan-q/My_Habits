@@ -2,9 +2,9 @@ package com.sinxn.myhabits.presentaion.habitAdd
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,7 +23,6 @@ import com.sinxn.myhabits.domain.model.SubTask
 import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.presentaion.main.MainViewModel
 import com.sinxn.myhabits.presentaion.main.TaskEvent
-import com.sinxn.myhabits.presentaion.util.Screen
 import com.sinxn.myhabits.util.Constants.collapsedTextSize
 import com.sinxn.myhabits.util.Constants.expandedTextSize
 import com.sinxn.myhabits.util.settings.Interval
@@ -41,7 +39,7 @@ fun HabitAddScreen(
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     var mDisplayMenu by remember { mutableStateOf(false) }
 
-    val topPaddddingmodifier = Modifier.padding(top = 15.dp)
+
     var category by rememberSaveable { mutableStateOf(true) }
     var name by rememberSaveable { mutableStateOf("") }
     var emoji by rememberSaveable { mutableStateOf("\uD83D\uDE42") }
@@ -53,26 +51,17 @@ fun HabitAddScreen(
     Scaffold(
         topBar = {
             LargeTopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                 scrollBehavior = scrollBehavior,
-                actions = {
-                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "")
-                    }
-                    DropdownMenu(
-                        expanded = mDisplayMenu,
-                        onDismissRequest = { mDisplayMenu = false }) {
-                        DropdownMenuItem(
-                            text = { Text(text = "Settings") },
-                            onClick = {
-                                navController.navigate(Screen.SettingsScreen.route)
-                            })
-                    }
-
-                },
                 title = {
                     Text(
                         text = stringResource(R.string.create_habit),
+                        style = MaterialTheme.typography.titleLarge,
                         fontSize = (collapsedTextSize + (expandedTextSize - collapsedTextSize) * (1 - scrollBehavior.state.collapsedFraction)).sp
                     )
                 },
@@ -81,27 +70,29 @@ fun HabitAddScreen(
     ) { padding ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(padding)
                 .padding(horizontal = 15.dp)
         )
         {
             Text(
-                modifier = topPaddddingmodifier.padding(bottom = 15.dp),
+                modifier = Modifier
+                    .padding(top = 30.dp)
+                    .padding(bottom = 15.dp),
                 text = "Enter Habit Name",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.headlineLarge
             )
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 modifier = Modifier.fillMaxWidth()
             )
-            Row(topPaddddingmodifier) {
+            Row(Modifier.padding(top = 30.dp)) {
                 Text(
-                    modifier = topPaddddingmodifier.weight(1f),
+                    modifier = Modifier.weight(1f),
                     text = "Category",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.headlineLarge
                 )
                 Button(
                     modifier = Modifier.padding(start = 15.dp),
@@ -131,19 +122,22 @@ fun HabitAddScreen(
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(top = 30.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    modifier = topPaddddingmodifier,
+                    modifier = Modifier,
                     text = "Select Emoji",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    style = MaterialTheme.typography.headlineLarge
                 )
                 OutlinedTextField(
                     value = emoji,
-                    onValueChange = { emoji = it },
+                    onValueChange = {
+                        if (it.length < 3)
+                            emoji = it
+                    },
                     modifier = Modifier.width(60.dp),
                     textStyle = TextStyle(fontSize = 20.sp),
                     singleLine = true
@@ -151,23 +145,23 @@ fun HabitAddScreen(
 
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Select Interval",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    style = MaterialTheme.typography.headlineLarge
                 )
                 IntervalMenu { interval = it }
             }
 
             Text(
-                modifier = topPaddddingmodifier,
+                modifier = Modifier.padding(top = 30.dp),
                 text = "Subtasks",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                style = MaterialTheme.typography.headlineLarge
             )
             Column {
                 subTasks.forEachIndexed { index, item ->
@@ -187,7 +181,7 @@ fun HabitAddScreen(
             ) {
                 Text(
                     text = " + Add subtask",
-                    modifier = Modifier.padding(vertical = 20.dp)
+                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 20.dp)
                 )
             }
             Row(
@@ -197,10 +191,9 @@ fun HabitAddScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    modifier = topPaddddingmodifier,
+                    modifier = Modifier.padding(top = 15.dp),
                     text = "Enable Reminder",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    style = MaterialTheme.typography.headlineLarge
                 )
                 Checkbox(checked = enableRemainder, onCheckedChange = { enableRemainder = it })
 
@@ -224,7 +217,7 @@ fun HabitAddScreen(
                 },
                 shape = MaterialTheme.shapes.medium,
             ) {
-                Text(text = "Cancel", fontSize = MaterialTheme.typography.titleLarge.fontSize)
+                Text(text = "Cancel", style = MaterialTheme.typography.headlineLarge)
             }
             Button(
                 modifier = Modifier
@@ -251,7 +244,7 @@ fun HabitAddScreen(
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text(text = "Save", fontSize = MaterialTheme.typography.titleLarge.fontSize)
+                Text(text = "Save", style = MaterialTheme.typography.headlineLarge)
             }
         }
     }
@@ -265,7 +258,9 @@ fun SubTaskItem(
     onDelete: () -> Unit
 ) {
     Row(
-        Modifier.fillMaxWidth(),
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -280,6 +275,7 @@ fun SubTaskItem(
             onValueChange = {
                 onChange(subTask.copy(title = it))
             },
+            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -301,7 +297,10 @@ fun IntervalMenu(
     }
 
     Box {
-        Button(onClick = { expanded = true }) {
+        Button(
+            onClick = { expanded = true },
+            shape = MaterialTheme.shapes.medium,
+        ) {
             Text(text = stringResource(id = intervalSelected))
         }
         DropdownMenu(
