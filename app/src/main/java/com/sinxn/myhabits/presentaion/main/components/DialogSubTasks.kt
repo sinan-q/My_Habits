@@ -22,10 +22,10 @@ import java.time.LocalDate
 @Composable
 fun SubTaskDialog(
     task: MainViewModel.TaskUiState,
+    date: Long = LocalDate.now().toEpochDay(),
     dialogDismiss: (Progress) -> Unit,
 ) {
     var id by rememberSaveable { mutableStateOf(0L) }
-    var habitId by rememberSaveable { mutableStateOf(0L) }
 
     var completed by rememberSaveable { mutableStateOf(false) }
     val subTasks = remember { mutableStateListOf<SubTask>() }
@@ -33,7 +33,6 @@ fun SubTaskDialog(
     LaunchedEffect(task) {
         id = task.progress.habitId
         subTasks.clear()
-        habitId = task.progress.id
         completed = task.progress.isCompleted
         subTasks.addAll(task.progress.subTasks)
     }
@@ -41,7 +40,13 @@ fun SubTaskDialog(
         onDismissRequest = {
             if (subTasks.size == subTasks.filter { it.isCompleted }.size) completed = true
             dialogDismiss(
-                Progress(id = habitId,habitId = id,date = LocalDate.now().toEpochDay() , isCompleted = completed, subTasks = subTasks.toList()))
+                Progress(
+                    habitId = id,
+                    date = date,
+                    isCompleted = completed,
+                    subTasks = subTasks.toList()
+                )
+            )
                            },
         properties = DialogProperties(
             dismissOnBackPress = true,

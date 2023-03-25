@@ -15,13 +15,15 @@ data class Task(
     val createdDate: Long = 0L,
     @ColumnInfo(name = "updated_date")
     val updatedDate: Long = 0L,
+    @ColumnInfo(name = "due_date")
+    val dueDate: Long = 0L,
     @ColumnInfo(name = "sub_tasks")
     val subTasks: List<SubTask> = emptyList(),
     val interval: Int = 0,
     val remainder: Boolean = false,
 
 
-)
+    )
 
 data class TaskWithProgress(
     @ColumnInfo(name = "id")
@@ -33,6 +35,8 @@ data class TaskWithProgress(
     val createdDate: Long = 0L,
     @ColumnInfo(name = "updated_date")
     val updatedDate: Long = 0L,
+    @ColumnInfo(name = "due_date")
+    val dueDate: Long = 0L,
     @ColumnInfo(name = "sub_tasks")
     val subTasks: List<SubTask> = emptyList(),
     val interval: Int = 0,
@@ -40,20 +44,31 @@ data class TaskWithProgress(
     @Embedded var progress: Progress?
 )
 
+data class TaskWithProgresses(
+    @Embedded var task: Task,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "habit_id"
+    )
+    var progress: List<Progress>
+)
+
 @Entity(
+    primaryKeys = ["habit_id", "date"],
     tableName = "progress",
-    foreignKeys = [ForeignKey(entity = Task::class, parentColumns = ["id"], childColumns = ["habit_id"])]
+    foreignKeys = [ForeignKey(
+        entity = Task::class,
+        parentColumns = ["id"],
+        childColumns = ["habit_id"],
+        onDelete = ForeignKey.CASCADE
+    )]
 )
 data class Progress(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "progress_id")
-    val id: Long = 0L,
     @ColumnInfo(name = "habit_id")
     val habitId: Long = 0,
     val date: Long = 0L,
     @ColumnInfo(name = "is_completed")
     val isCompleted: Boolean = false,
     val subTasks: List<SubTask> = emptyList(),
-
     )
 

@@ -216,7 +216,8 @@ fun HomeScreen(
             }
             if (openSubTaskDialog)
                 SubTaskDialog(
-                    task = viewModel.taskDetailsUiState
+                    task = viewModel.taskDetailsUiState,
+                    date = uiState.date
                 ) {
                     openSubTaskDialog = false
                     viewModel.onEvent(TaskEvent.UpdateProgress(it))
@@ -225,7 +226,7 @@ fun HomeScreen(
                 TaskDialog(
                     task = viewModel.taskDetailsUiState,
                     dialogDismiss = { openTaskDialog = false },
-                    onDelete = { /*TODO*/ },
+                    onDelete = { viewModel.onEvent(TaskEvent.DeleteTask(it)) },
                     onComplete = {}
                 )
 
@@ -274,8 +275,9 @@ fun HabitRow(
     val subTasksSize = (taskWithProgress().subTasks.size)
 
     val progress = (taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?: 0)
+
     val progressText =
-        if (subTasksSize != 0) "$progress/$subTasksSize" else if (taskWithProgress().progress?.isCompleted == false) "Not Completed" else "Completed"
+        if (subTasksSize != 0) "$progress/$subTasksSize" else if (taskWithProgress().progress?.isCompleted == true) "Completed" else "Not Completed"
 
     Box(modifier = Modifier
         .padding(end = 35.dp)

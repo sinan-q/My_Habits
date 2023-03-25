@@ -17,15 +17,13 @@ import com.sinxn.myhabits.presentaion.main.MainViewModel
 fun TaskDialog(
     task: MainViewModel.TaskUiState,
     dialogDismiss: () -> Unit,
-    onDelete: () -> Unit,
+    onDelete: (Long) -> Unit,
     onComplete: () -> Unit,
 ) {
     var id by rememberSaveable { mutableStateOf(0L) }
-    var habitId by rememberSaveable { mutableStateOf(0L) }
 
     LaunchedEffect(task) {
         id = task.progress.habitId
-        habitId = task.progress.id
     }
 
     Dialog(
@@ -47,7 +45,10 @@ fun TaskDialog(
                 Button(onClick = { onComplete() }) {
                     Text(text = "Mark as Completed")
                 }
-                Button(onClick = { onDelete() }) {
+                Button(onClick = {
+                    dialogDismiss()
+                    onDelete(id)
+                }) {
                     Text(text = "Delete Entirely", color = Color.Red)
                 }
             }

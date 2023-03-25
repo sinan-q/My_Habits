@@ -5,6 +5,7 @@ import com.sinxn.myhabits.data.local.dao.TaskDao
 import com.sinxn.myhabits.domain.model.Progress
 import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.domain.model.TaskWithProgress
+import com.sinxn.myhabits.domain.model.TaskWithProgresses
 import com.sinxn.myhabits.domain.repository.TaskRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -20,9 +21,8 @@ class TaskRepositoryImpl(
         return taskDao.getTasksWithProgress(date)
     }
 
-    override suspend fun getTaskById(date: Long, id: Long): Task {
+    override suspend fun getTaskById(id: Long): TaskWithProgresses {
         return withContext(ioDispatcher) {
-            Log.d("TAG", "getTaskById: ${taskDao.getTask(id)}")
             taskDao.getTask(id)
         }
     }
@@ -55,9 +55,9 @@ class TaskRepositoryImpl(
 //        }
     }
 
-    override suspend fun deleteTask(task: Task) {
+    override suspend fun deleteTask(id: Long) {
         withContext(ioDispatcher) {
-            taskDao.deleteTask(task)
+            taskDao.deleteTask(id)
         }
     }
 

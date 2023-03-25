@@ -110,14 +110,22 @@ class MainViewModel @Inject constructor(
                 }
             }
             is TaskEvent.DeleteTask -> viewModelScope.launch {
+
                 taskRepository.deleteTask(event.task)
+
+
             }
             is TaskEvent.SetTask -> viewModelScope.launch {
 
                 taskDetailsUiState = taskDetailsUiState.copy(
                     title = event.task.title,
                     emoji = event.task.emoji,
-                    progress = event.task.progress?: Progress(date = tasksUiState.date, habitId = event.task.id, subTasks = event.task.subTasks)
+                    progress = event.task.progress ?: Progress(
+                        date = tasksUiState.date,
+                        habitId = event.task.id,
+                        isCompleted = false,
+                        subTasks = event.task.subTasks
+                    )
 
                 )
             }

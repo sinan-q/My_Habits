@@ -3,13 +3,14 @@ package com.sinxn.myhabits.domain.repository
 import com.sinxn.myhabits.domain.model.Progress
 import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.domain.model.TaskWithProgress
+import com.sinxn.myhabits.domain.model.TaskWithProgresses
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
 
     fun getAllTasks(date: Long): Flow<List<TaskWithProgress>>
 
-    suspend fun getTaskById(date: Long, id: Long): Task
+    suspend fun getTaskById(id: Long): TaskWithProgresses
 
     fun searchTasks(date: Long,title: String): Flow<List<Task>>
 
@@ -21,6 +22,5 @@ interface TaskRepository {
 
     suspend fun completeTask(date: Long, id: Long, completed: Boolean)
 
-    suspend fun deleteTask(task: Task)
-
+    suspend fun deleteTask(id: Long)
 }
