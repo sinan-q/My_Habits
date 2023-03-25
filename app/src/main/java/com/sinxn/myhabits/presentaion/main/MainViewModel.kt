@@ -24,7 +24,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 
-data class DateRowClass(val Date: String, val dateString: String)
+data class DateRowClass(val epoch: Long, val Date: String, val dateString: String)
+
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val addTask: AddTaskUseCase,
@@ -56,7 +57,13 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             for (i in -4..4) {
                 val date = LocalDate.now().plusDays(i.toLong())
-                dateRow.add(DateRowClass(date.dayOfMonth.toString(),date.dayOfWeek.name.slice(0..2)))
+                dateRow.add(
+                    DateRowClass(
+                        date.toEpochDay(),
+                        date.dayOfMonth.toString(),
+                        date.dayOfWeek.name.slice(0..2)
+                    )
+                )
             }
             getTasks(LocalDate.now().toEpochDay())
 

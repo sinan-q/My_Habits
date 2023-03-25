@@ -23,7 +23,7 @@ interface TaskDao {
 
     @Transaction
     @Query("SELECT * FROM tasks WHERE id = :id")
-    suspend fun getTask(id: Long): TaskWithProgress
+    suspend fun getTask(id: Long): Task
 
     @Query("SELECT * FROM tasks WHERE title LIKE '%' || :title || '%'")
     fun getTasksByTitle(title: String): Flow<List<Task>>

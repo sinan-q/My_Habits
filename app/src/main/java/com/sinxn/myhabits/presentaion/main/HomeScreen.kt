@@ -1,9 +1,10 @@
 package com.sinxn.myhabits.presentaion.main
 
 import android.annotation.SuppressLint
-import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -26,9 +27,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.sinxn.myhabits.R
 import com.sinxn.myhabits.domain.model.TaskWithProgress
-import com.sinxn.myhabits.presentaion.main.components.CompleteDialogContent
+import com.sinxn.myhabits.presentaion.main.components.SubTaskDialog
+import com.sinxn.myhabits.presentaion.main.components.TaskDialog
 import com.sinxn.myhabits.presentaion.util.Screen
 import com.sinxn.myhabits.util.Constants
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -38,7 +41,9 @@ fun HomeScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.tasksUiState
-    var openDialog by rememberSaveable { mutableStateOf(false) }
+    var openSubTaskDialog by rememberSaveable { mutableStateOf(false) }
+    var openTaskDialog by rememberSaveable { mutableStateOf(false) }
+
     val lazyListState = rememberLazyListState()
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -118,7 +123,11 @@ fun HomeScreen(
             }
             LazyRow(state = lazyListState,horizontalArrangement = Arrangement.Center) {
                 items(viewModel.dateRow) { item ->
-                    DateRow(item.Date,item.dateString,viewModel.currentDate.toString()) { }
+                    DateRow(item, uiState.date,
+                        onClick = {
+                            viewModel.onEvent(TaskEvent.OnDateChange(it))
+                        }
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -139,13 +148,24 @@ fun HomeScreen(
                 )
             }
             LazyRow(modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)) {
-                items(uiState.goodTasks) {task ->
-                    HabitRow({ task }) {it ->
-
-                        openDialog=true
-                        viewModel.onEvent(TaskEvent.SetTask(task = it))
-                    }
-                    }
+                items(uiState.goodTasks) { task ->
+                    HabitRow(taskWithProgress = { task },
+                        onClick = {
+                            viewModel.onEvent(TaskEvent.SetTask(task = task))
+                            if (task.subTasks.isNotEmpty()) openSubTaskDialog = true
+                            viewModel.onEvent(
+                                TaskEvent.UpdateProgress(
+                                    viewModel.taskDetailsUiState.progress.copy(
+                                        isCompleted = !viewModel.taskDetailsUiState.progress.isCompleted
+                                    )
+                                )
+                            )
+                        },
+                        onLongClick = {
+                            viewModel.onEvent(TaskEvent.SetTask(task = task))
+                            openTaskDialog = true
+                        })
+                }
             }
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -175,21 +195,39 @@ fun HomeScreen(
             }
             LazyRow {
                 items(uiState.badTasks) { task ->
-                    HabitRow({ task }) { it ->
-
-                        openDialog = true
-                        viewModel.onEvent(TaskEvent.SetTask(task = it))
-                    }
+                    HabitRow(taskWithProgress = { task },
+                        onClick = {
+                            viewModel.onEvent(TaskEvent.SetTask(task = task))
+                            if (task.subTasks.isNotEmpty()) openSubTaskDialog = true
+                            viewModel.onEvent(
+                                TaskEvent.UpdateProgress(
+                                    viewModel.taskDetailsUiState.progress.copy(
+                                        isCompleted = !viewModel.taskDetailsUiState.progress.isCompleted
+                                    )
+                                )
+                            )
+                        },
+                        onLongClick = {
+                            viewModel.onEvent(TaskEvent.SetTask(task = task))
+                            openTaskDialog = true
+                        })
 
                 }
             }
-            if (openDialog)
-                CompleteDialogContent(
+            if (openSubTaskDialog)
+                SubTaskDialog(
                     task = viewModel.taskDetailsUiState
-                ) { openDialog = false
-                    Log.d("TAG", "HomeScreen: ${it.subTasks.size}")
+                ) {
+                    openSubTaskDialog = false
                     viewModel.onEvent(TaskEvent.UpdateProgress(it))
-                    }
+                }
+            if (openTaskDialog)
+                TaskDialog(
+                    task = viewModel.taskDetailsUiState,
+                    dialogDismiss = { openTaskDialog = false },
+                    onDelete = { /*TODO*/ },
+                    onComplete = {}
+                )
 
         }
     }
@@ -202,45 +240,49 @@ fun HomeScreen(
 
 @Composable
 fun DateRow(
-    dateString: String,
-    date: String,
-    today: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    date: DateRowClass,
+    selectedDate: Long = LocalDate.now().toEpochDay(),
+    onClick: (Long) -> Unit
 ) {
-    val modifer = if (dateString == today) Modifier
+    val modifier = if (date.epoch == selectedDate) Modifier
+        .clip(RoundedCornerShape(16.dp))
         .background(color = MaterialTheme.colorScheme.primaryContainer)
-        .clip(RoundedCornerShape(16.dp)) else Modifier
-    Box(modifier = modifer
-        .size(80.dp)
-        .padding(end = 15.dp)
-        .clickable { onClick() }, contentAlignment = Alignment.Center
+    else Modifier
+    Box(
+        modifier = modifier
+            .size(80.dp)
+            .padding(end = 15.dp)
+            .clickable { onClick(date.epoch) }, contentAlignment = Alignment.Center
     ) {
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = dateString, fontSize = 14.sp)
-            Text(text = date, fontSize = 14.sp)
+            Text(text = date.dateString, fontSize = 14.sp)
+            Text(text = date.Date, fontSize = 14.sp)
         }
 
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HabitRow(
     taskWithProgress: () -> (TaskWithProgress),
-    onClick: (TaskWithProgress) -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 
 ) {
-    val total = (taskWithProgress().subTasks.size)
+    val subTasksSize = (taskWithProgress().subTasks.size)
 
-    val progress = (taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?:0)
-    val progressText = if (total!=0) "$progress/$total" else if (progress==0) "" else "Completed"
+    val progress = (taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?: 0)
+    val progressText =
+        if (subTasksSize != 0) "$progress/$subTasksSize" else if (taskWithProgress().progress?.isCompleted == false) "Not Completed" else "Completed"
 
     Box(modifier = Modifier
         .padding(end = 35.dp)
         .width(130.dp)
         .height(150.dp)
-        .clickable { onClick(taskWithProgress()) }
+        .combinedClickable(onClick = { onClick() },
+            onLongClick = { onLongClick() })
     )
     {
         Column(modifier = Modifier

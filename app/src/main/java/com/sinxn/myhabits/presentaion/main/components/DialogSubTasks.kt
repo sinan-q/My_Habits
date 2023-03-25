@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 
 @Composable
-fun CompleteDialogContent(
+fun SubTaskDialog(
     task: MainViewModel.TaskUiState,
     dialogDismiss: (Progress) -> Unit,
 ) {

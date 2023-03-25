@@ -9,7 +9,7 @@ interface TaskRepository {
 
     fun getAllTasks(date: Long): Flow<List<TaskWithProgress>>
 
-    suspend fun getTaskById(date: Long, id: Long): TaskWithProgress
+    suspend fun getTaskById(date: Long, id: Long): Task
 
     fun searchTasks(date: Long,title: String): Flow<List<Task>>
 

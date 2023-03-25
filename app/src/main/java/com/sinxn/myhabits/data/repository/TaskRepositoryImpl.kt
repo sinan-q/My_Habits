@@ -20,7 +20,7 @@ class TaskRepositoryImpl(
         return taskDao.getTasksWithProgress(date)
     }
 
-    override suspend fun getTaskById(date: Long, id: Long): TaskWithProgress {
+    override suspend fun getTaskById(date: Long, id: Long): Task {
         return withContext(ioDispatcher) {
             Log.d("TAG", "getTaskById: ${taskDao.getTask(id)}")
             taskDao.getTask(id)
