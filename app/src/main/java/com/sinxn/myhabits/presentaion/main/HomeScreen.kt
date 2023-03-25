@@ -72,7 +72,8 @@ fun HomeScreen(
                 },
                 title = {
                     Text(
-                        text = stringResource(R.string.home),
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge,
                         fontSize = (Constants.collapsedTextSize + (Constants.expandedTextSize - Constants.collapsedTextSize) * (1 - scrollBehavior.state.collapsedFraction)).sp
                     )
                 },
@@ -93,16 +94,15 @@ fun HomeScreen(
         Column(modifier = Modifier
             .padding(padding)
             .padding(start = 15.dp, end = 15.dp)) {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Text(
                 text = "Welcome,", //TODO get from res
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                style = MaterialTheme.typography.headlineSmall
             )
             Text(
                 text = "Name", //TODO get name
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
+                style = MaterialTheme.typography.headlineLarge
+
             )
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.fillMaxWidth(),
@@ -138,8 +138,8 @@ fun HomeScreen(
             {
                 Text(
                     text = "Do's",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    style = MaterialTheme.typography.headlineLarge
+
                 )
                 Text(
                     text = "See More",
@@ -175,8 +175,7 @@ fun HomeScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "Dont's",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        style = MaterialTheme.typography.headlineLarge
                     )
                     IconButton(onClick = { /*TODO*/ }) {
                         Icon(
@@ -245,20 +244,25 @@ fun DateRow(
     selectedDate: Long = LocalDate.now().toEpochDay(),
     onClick: (Long) -> Unit
 ) {
-    val modifier = if (date.epoch == selectedDate) Modifier
-        .clip(RoundedCornerShape(16.dp))
-        .background(color = MaterialTheme.colorScheme.primaryContainer)
-    else Modifier
-    Box(
+    var modifier = Modifier
+        .padding(end = 15.dp)
+        .height(50.dp)
+        .width(60.dp)
+
+    if (date.epoch == selectedDate) {
         modifier = modifier
-            .size(80.dp)
-            .padding(end = 15.dp)
-            .clickable { onClick(date.epoch) }, contentAlignment = Alignment.Center
+            .clip(RoundedCornerShape(10.dp))
+            .background(color = MaterialTheme.colorScheme.primaryContainer)
+    }
+    modifier = modifier.clickable { onClick(date.epoch) }
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
     ) {
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = date.dateString, fontSize = 14.sp)
-            Text(text = date.Date, fontSize = 14.sp)
+            Text(text = date.dateString, style = MaterialTheme.typography.labelSmall)
+            Text(text = date.Date, style = MaterialTheme.typography.labelMedium)
         }
 
     }
@@ -295,7 +299,7 @@ fun HabitRow(
 
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = taskWithProgress().title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = progressText)
+            Text(text = progressText, style = MaterialTheme.typography.labelSmall)
         }
     }
 }
