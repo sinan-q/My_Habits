@@ -49,7 +49,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun completeTask(date: Long, id: Int, completed: Boolean) {
+    override suspend fun completeTask(date: Long, id: Long, completed: Boolean) {
 //        withContext(ioDispatcher) {
 //            taskDao.updateCompleted(id, completed)
 //        }

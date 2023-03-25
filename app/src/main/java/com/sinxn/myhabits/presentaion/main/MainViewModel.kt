@@ -6,13 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sinxn.myhabits.R
 import com.sinxn.myhabits.app.getString
-import com.sinxn.myhabits.domain.model.Alarm
 import com.sinxn.myhabits.domain.model.Progress
 import com.sinxn.myhabits.domain.model.Task
 import com.sinxn.myhabits.domain.model.TaskWithProgress
-import com.sinxn.myhabits.domain.use_case.alarm.AddAlarmUseCase
-import com.sinxn.myhabits.domain.use_case.alarm.DeleteAlarmUseCase
-import com.sinxn.myhabits.domain.use_case.task.*
+import com.sinxn.myhabits.domain.repository.TaskRepository
 import com.sinxn.myhabits.util.settings.Order
 import com.sinxn.myhabits.util.settings.OrderType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,17 +25,8 @@ data class DateRowClass(val epoch: Long, val Date: String, val dateString: Strin
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val addTask: AddTaskUseCase,
-    private val getAllTasks: GetAllTasksUseCase,
-    private val getTaskUseCase: GetTaskByIdUseCase,
-    private val updateTask: UpdateTaskUseCase,
-    private val updateProgress: UpdateProgressUseCase,
+    private val taskRepository: TaskRepository,
 
-    private val completeTask: UpdateTaskCompletedUseCase,
-    private val deleteTask: DeleteTaskUseCase,
-    private val searchTasksUseCase: SearchTasksUseCase,
-    private val addAlarm: AddAlarmUseCase,
-    private val deleteAlarm: DeleteAlarmUseCase,
     ) : ViewModel() {
 
     var tasksUiState by mutableStateOf(UiState())
@@ -75,8 +63,7 @@ class MainViewModel @Inject constructor(
             is TaskEvent.AddTask -> {
                 if (event.task.title.isNotBlank()) {
                     viewModelScope.launch {
-                        val taskId = addTask(event.task)
-                        if (event.task.remainder) addAlarm(Alarm(taskId.toInt(),))
+                        val taskId = taskRepository.insertTask(event.task)
                     }
 
                 }else
@@ -84,9 +71,8 @@ class MainViewModel @Inject constructor(
             }
 
             is TaskEvent.CompleteTask -> viewModelScope.launch {
-                completeTask(event.task.habitId, event.complete)
-                if (event.complete)
-                    deleteAlarm(event.task.habitId)
+                //   taskRepository.completeTask(event.date ,event.task.habitId, event.complete)
+
             }
             TaskEvent.ErrorDisplayed -> {
                 tasksUiState = tasksUiState.copy(error = null)
@@ -114,29 +100,17 @@ class MainViewModel @Inject constructor(
                 getTasks(event.date)
             }
             is TaskEvent.UpdateProgress -> viewModelScope.launch {
-                updateProgress(event.progress)
+                taskRepository.updateTaskProgress(event.progress)
             }
             is TaskEvent.UpdateTask -> viewModelScope.launch {
                 if (event.task.title.isBlank())
                     taskDetailsUiState = taskDetailsUiState.copy(error = getString(R.string.error_empty_title))
                 else {
-                    updateTask(event.task.copy(updatedDate = System.currentTimeMillis()))
-//                    if (event.task.dueDate != taskDetailsUiState.task.dueDate){
-//                        if (event.task.dueDate != 0L)
-//                            addAlarm(
-//                                Alarm(
-//                                    event.task.id,
-//                                    event.task.dueDate
-//                                )
-//                            )
-//                        else
-//                            deleteAlarm(event.task.id)
-//                    }
+                    taskRepository.updateTask(event.task.copy(updatedDate = System.currentTimeMillis()))
                 }
             }
             is TaskEvent.DeleteTask -> viewModelScope.launch {
-                deleteTask(event.task)
-                if (event.task.remainder) deleteAlarm(event.task.habitId)
+                taskRepository.deleteTask(event.task)
             }
             is TaskEvent.SetTask -> viewModelScope.launch {
 
@@ -172,7 +146,7 @@ class MainViewModel @Inject constructor(
 
     private fun getTasks(date: Long ,order: Order = Order.DateCreated(), showCompleted: Boolean = true) {
         getTasksJob?.cancel()
-        getTasksJob = getAllTasks(date,order)
+        getTasksJob = taskRepository.getAllTasks(date)
             .onEach { tasks ->
 
                 tasksUiState = tasksUiState.copy(
@@ -185,7 +159,7 @@ class MainViewModel @Inject constructor(
     }
     private fun searchTasks(date:Long,query: String){
         searchTasksJob?.cancel()
-        searchTasksJob = searchTasksUseCase(date,query).onEach { tasks ->
+        searchTasksJob = taskRepository.searchTasks(date, query).onEach { tasks ->
             tasksUiState = tasksUiState.copy(
                 searchTasks = tasks
             )
