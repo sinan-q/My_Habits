@@ -12,7 +12,7 @@ interface TaskDao {
 
     @Transaction
     @Query(
-        "SELECT * FROM tasks LEFT OUTER JOIN progress ON tasks.id = progress.habit_id AND progress.date = :date "
+        "SELECT * FROM tasks LEFT OUTER JOIN progress ON tasks.id = progress.habit_id AND progress.date = :date WHERE tasks.due_date = 0 OR tasks.due_date >= :date; "
     )
     fun getTasksWithProgress(date: Long): Flow<List<TaskWithProgress>>
 
@@ -42,8 +42,6 @@ interface TaskDao {
     @Query("DELETE FROM tasks WHERE id = :id;")
     suspend fun deleteTask(id: Long)
 
-    @Query("DELETE FROM progress WHERE habit_id = :id;")
-    suspend fun deleteProgresses(id: Long)
 
 //    @Query("UPDATE tasks SET is_completed = :completed WHERE id = :id")
 //    suspend fun updateCompleted(id: Int, completed: Boolean)

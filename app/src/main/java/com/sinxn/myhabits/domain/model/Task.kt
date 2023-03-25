@@ -70,5 +70,6 @@ data class Progress(
     @ColumnInfo(name = "is_completed")
     val isCompleted: Boolean = false,
     val subTasks: List<SubTask> = emptyList(),
+    val note: String = ""
     )
 
