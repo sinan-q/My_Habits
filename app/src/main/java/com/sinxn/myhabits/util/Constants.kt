@@ -19,5 +19,7 @@ object Constants {
     const val collapsedTextSize = 16
     const val expandedTextSize = 28
 
+    //Settings
+    const val USER_NAME = "user_name"
 
 }

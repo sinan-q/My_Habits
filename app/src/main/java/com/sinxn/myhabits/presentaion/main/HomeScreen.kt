@@ -7,26 +7,23 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.sinxn.myhabits.R
 import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.presentaion.main.components.SubTaskDialog
 import com.sinxn.myhabits.presentaion.main.components.TaskDialog
+import com.sinxn.myhabits.presentaion.settings.SettingsViewModel
 import com.sinxn.myhabits.presentaion.util.Screen
 import com.sinxn.myhabits.util.Constants
 import java.time.LocalDate
@@ -36,50 +33,18 @@ import java.time.LocalDate
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+
 ) {
     val uiState = viewModel.tasksUiState
     var openSubTaskDialog by rememberSaveable { mutableStateOf(false) }
     var openTaskDialog by rememberSaveable { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-    var mDisplayMenu by remember { mutableStateOf(false) }
+
 
     Scaffold(
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .padding(bottom = 55.dp),
-        topBar = {
-            LargeTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                scrollBehavior = scrollBehavior,
-                actions = {
-                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "")
-                    }
-                    DropdownMenu(
-                        expanded = mDisplayMenu,
-                        onDismissRequest = { mDisplayMenu = false }) {
-                        DropdownMenuItem(
-                            text = { Text(text = "Settings") },
-                            onClick = {
-                                navController.navigate(Screen.SettingsScreen.route)
-                            })
-                    }
-
-                },
-                title = {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontSize = (Constants.collapsedTextSize + (Constants.expandedTextSize - Constants.collapsedTextSize) * (1 - scrollBehavior.state.collapsedFraction)).sp
-                    )
-                },
-            )
-        },
-
         floatingActionButton =
         {
             FloatingActionButton(onClick = { navController.navigate(Screen.HabitAddScreen.route) }){
@@ -96,23 +61,32 @@ fun HomeScreen(
         }
 
     ) { padding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(padding)
-            .padding(start = 15.dp, end = 15.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+
+        ) {
             Spacer(modifier = Modifier.height(30.dp))
             Text(
                 text = "Welcome,", //TODO get from res
                 style = MaterialTheme.typography.headlineSmall
             )
             Text(
-                text = "Name", //TODO get name
+                text = settingsViewModel.getSettings(
+                    stringPreferencesKey(Constants.USER_NAME),
+                    "User"
+                ).collectAsState(
+                    initial = "User"
+                ).value, //TODO get name
                 style = MaterialTheme.typography.headlineLarge
 
             )
             Spacer(modifier = Modifier.height(15.dp))
-            Row(modifier = Modifier.fillMaxWidth(),
+            Divider(color = LocalContentColor.current)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             )
@@ -140,7 +114,7 @@ fun HomeScreen(
                 }
             }
             Spacer(modifier = Modifier.height(5.dp))
-            Divider()
+            Divider(color = LocalContentColor.current)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -180,7 +154,8 @@ fun HomeScreen(
                         })
                 }
             }
-            Row(modifier = Modifier.fillMaxWidth(),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             )

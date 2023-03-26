@@ -31,6 +31,9 @@ val Typography = Typography(
     ),
     labelSmall = TextStyle(
         fontSize = 12.sp,
+    ),
+    labelLarge = TextStyle(
+        fontSize = 14.sp,
     )
 
 )

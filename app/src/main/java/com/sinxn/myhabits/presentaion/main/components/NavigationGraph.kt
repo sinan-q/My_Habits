@@ -6,14 +6,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.sinxn.myhabits.presentaion.main.DashboardScreen
 import com.sinxn.myhabits.presentaion.main.HomeScreen
-import com.sinxn.myhabits.presentaion.main.SettingsScreen
+import com.sinxn.myhabits.presentaion.settings.SettingsScreen
 import com.sinxn.myhabits.presentaion.util.Screen
 
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
     mainNavController: NavHostController,
-    startUpScreen: String
+    startUpScreen: String,
 ) {
     NavHost(navController = navController, startDestination = startUpScreen){
 
