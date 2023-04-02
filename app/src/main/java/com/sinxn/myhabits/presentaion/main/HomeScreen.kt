@@ -27,28 +27,28 @@ import com.sinxn.myhabits.presentaion.settings.SettingsViewModel
 import com.sinxn.myhabits.presentaion.util.Screen
 import com.sinxn.myhabits.util.Constants
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: MainViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel()
-
 ) {
     val uiState = viewModel.tasksUiState
     var openSubTaskDialog by rememberSaveable { mutableStateOf(false) }
     var openTaskDialog by rememberSaveable { mutableStateOf(false) }
 
-    val lazyListState = rememberLazyListState()
-
 
     Scaffold(
         floatingActionButton =
         {
-            FloatingActionButton(onClick = { navController.navigate(Screen.HabitAddScreen.route) }){
-                Row(Modifier.padding(horizontal = 15.dp), verticalAlignment = Alignment.CenterVertically) {
+            FloatingActionButton(onClick = { navController.navigate(Screen.HabitAddScreen.route) }) {
+                Row(
+                    Modifier.padding(horizontal = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         painter = painterResource(id = android.R.drawable.ic_input_add),
                         contentDescription = null
@@ -60,12 +60,11 @@ fun HomeScreen(
             }
         }
 
-    ) { padding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-
         ) {
             Spacer(modifier = Modifier.height(30.dp))
             Text(
@@ -78,37 +77,42 @@ fun HomeScreen(
                     "User"
                 ).collectAsState(
                     initial = "User"
-                ).value, //TODO get name
+                ).value,
                 style = MaterialTheme.typography.headlineLarge
 
             )
             Spacer(modifier = Modifier.height(15.dp))
-            Divider(color = LocalContentColor.current)
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             )
             {
                 Text(
-                    text = "25,July 2023", //TODO selected date
+                    text = "<",
                     fontSize = 16.sp
                 )
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        painter = painterResource(android.R.drawable.ic_menu_my_calendar),
-                        contentDescription = "Calendar Icon",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
+                Text(
+                    text = LocalDate.ofEpochDay(uiState.date)
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE), //TODO selected date
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = ">",
+                    fontSize = 16.sp
+                )
             }
-            LazyRow(state = lazyListState, horizontalArrangement = Arrangement.Center) {
-                items(viewModel.dateRow) { item ->
-                    DateRow(item, uiState.date,
+            Spacer(modifier = Modifier.height(15.dp))
+
+            LazyRow(
+                state = rememberLazyListState(initialFirstVisibleItemIndex = 2),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                items(uiState.dateRow) { item ->
+
+                    DateRow(item.Date, item.dateString, item.epoch, uiState.date,
                         onClick = {
-                            viewModel.onEvent(TaskEvent.OnDateChange(it))
+                            viewModel.onEvent(TaskEvent.OnDateChange(item.epoch))
                         }
                     )
                 }
@@ -220,41 +224,40 @@ fun HomeScreen(
         }
     }
 
-
-
-
 }
-
 
 @Composable
 fun DateRow(
-    date: DateRowClass,
+    date: String,
+    dateString: String,
+    epoch: Long,
     selectedDate: Long = LocalDate.now().toEpochDay(),
-    onClick: (Long) -> Unit
+    onClick: () -> Unit
 ) {
     var modifier = Modifier
         .padding(end = 15.dp)
         .height(50.dp)
         .width(60.dp)
 
-    if (date.epoch == selectedDate) {
+    if (epoch == selectedDate) {
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .background(color = MaterialTheme.colorScheme.primaryContainer)
     }
-    modifier = modifier.clickable { onClick(date.epoch) }
+    modifier = modifier.clickable { onClick() }
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = date.dateString, style = MaterialTheme.typography.labelSmall)
-            Text(text = date.Date, style = MaterialTheme.typography.labelMedium)
+            Text(text = dateString, style = MaterialTheme.typography.labelSmall)
+            Text(text = date, style = MaterialTheme.typography.labelMedium)
         }
 
     }
 }
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

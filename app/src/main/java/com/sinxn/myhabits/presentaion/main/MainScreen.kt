@@ -38,7 +38,7 @@ fun MainScreen(
         listOf(BottomNavItem.Home, BottomNavItem.Dashboard, BottomNavItem.Settings)
     Scaffold(
         modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .fillMaxSize(),
         bottomBar = {
             MainBottomBar(navController = navController, items = bottomNavItems)
         },
@@ -74,9 +74,9 @@ fun MainScreen(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(start = 15.dp, end = 15.dp)
                 .padding(it)
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
             NavigationGraph(
                 navController = navController,

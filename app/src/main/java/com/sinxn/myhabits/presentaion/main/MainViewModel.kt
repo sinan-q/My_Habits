@@ -38,14 +38,11 @@ class MainViewModel @Inject constructor(
     private var searchTasksJob: Job? = null
 
 
-    var dateRow:MutableList<DateRowClass> = mutableListOf()
-    var currentDate by mutableStateOf(LocalDate.now().dayOfMonth)
-
     init {
         viewModelScope.launch {
             for (i in -4..4) {
                 val date = LocalDate.now().plusDays(i.toLong())
-                dateRow.add(
+                tasksUiState.dateRow.add(
                     DateRowClass(
                         date.toEpochDay(),
                         date.dayOfMonth.toString(),
@@ -141,6 +138,8 @@ class MainViewModel @Inject constructor(
         val showCompletedTasks: Boolean = false,
         val error: String? = null,
         val date: Long = LocalDate.now().toEpochDay(),
+        var dateRow: MutableList<DateRowClass> = mutableListOf(),
+
 
         val searchTasks: List<Task> = emptyList()
     )
