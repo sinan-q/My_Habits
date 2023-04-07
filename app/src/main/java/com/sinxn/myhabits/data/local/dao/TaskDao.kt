@@ -24,6 +24,13 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :id")
     suspend fun getTask(id: Long): TaskWithProgresses
 
+    @Query("SELECT streak FROM progress WHERE habit_id = :id AND date = :date")
+    suspend fun getStreak(id: Long, date: Long): Int?
+
+    @Query("SELECT is_completed FROM progress WHERE habit_id = :id AND date = :date")
+    suspend fun isComplete(id: Long, date: Long): Boolean?
+
+
     @Query("SELECT * FROM tasks WHERE title LIKE '%' || :title || '%'")
     fun getTasksByTitle(title: String): Flow<List<Task>>
 
@@ -41,6 +48,9 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks WHERE id = :id;")
     suspend fun deleteTask(id: Long)
+
+    @Query("UPDATE progress SET streak = :streak WHERE habit_id = :id AND date = :date;")
+    suspend fun updateStreak(id: Long, date: Long, streak: Int)
 
 
 //    @Query("UPDATE tasks SET is_completed = :completed WHERE id = :id")

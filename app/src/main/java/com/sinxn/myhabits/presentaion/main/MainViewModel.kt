@@ -97,7 +97,10 @@ class MainViewModel @Inject constructor(
                 getTasks(event.date)
             }
             is TaskEvent.UpdateProgress -> viewModelScope.launch {
-                taskRepository.updateTaskProgress(event.progress)
+                taskRepository.updateTaskProgress(
+                    event.progress,
+                    today = LocalDate.now().toEpochDay()
+                )
             }
             is TaskEvent.UpdateTask -> viewModelScope.launch {
                 if (event.task.title.isBlank())
@@ -117,12 +120,7 @@ class MainViewModel @Inject constructor(
                 taskDetailsUiState = taskDetailsUiState.copy(
                     title = event.task.title,
                     emoji = event.task.emoji,
-                    progress = event.task.progress ?: Progress(
-                        date = tasksUiState.date,
-                        habitId = event.task.id,
-                        isCompleted = false,
-                        subTasks = event.task.subTasks
-                    )
+                    progress = event.task.progress!!
 
                 )
             }

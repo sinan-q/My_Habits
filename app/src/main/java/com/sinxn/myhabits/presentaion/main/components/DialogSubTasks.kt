@@ -29,25 +29,35 @@ fun SubTaskDialog(
 
     var completed by rememberSaveable { mutableStateOf(false) }
     val subTasks = remember { mutableStateListOf<SubTask>() }
+    var streak by remember { mutableStateOf(0) }
+
 
     LaunchedEffect(task) {
         id = task.progress.habitId
         subTasks.clear()
         completed = task.progress.isCompleted
         subTasks.addAll(task.progress.subTasks)
+        streak = task.progress.streak
     }
     Dialog(
         onDismissRequest = {
+            val doneAlready = completed
             if (subTasks.size == subTasks.filter { it.isCompleted }.size) completed = true
+
             dialogDismiss(
                 Progress(
                     habitId = id,
                     date = date,
                     isCompleted = completed,
-                    subTasks = subTasks.toList()
+                    subTasks = subTasks.toList(),
+                    streak = when {
+                        doneAlready && !completed -> kotlin.math.max(streak - 1, 0)
+                        !doneAlready && completed -> streak + 1
+                        else -> streak
+                    }
                 )
             )
-                           },
+        },
         properties = DialogProperties(
             dismissOnBackPress = true,
             dismissOnClickOutside = true
@@ -69,7 +79,8 @@ fun SubTaskDialog(
                         subTask = item,
                         onChange = {
                             Log.d("TAG", "3: ${subTasks.size}")
-                            subTasks[index] = subTasks[index].copy(isCompleted = it) },
+                            subTasks[index] = subTasks[index].copy(isCompleted = it)
+                        },
                     )
                 }
             }
@@ -93,8 +104,10 @@ fun SubTaskItemProgress(
 
         Checkbox(
             checked = checked,
-            onCheckedChange = { checked = it
-                onChange(it) },
+            onCheckedChange = {
+                checked = it
+                onChange(it)
+            },
         )
         Spacer(Modifier.width(8.dp))
 

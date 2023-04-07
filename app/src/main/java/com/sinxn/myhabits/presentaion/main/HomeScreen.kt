@@ -39,6 +39,9 @@ fun HomeScreen(
     val uiState = viewModel.tasksUiState
     var openSubTaskDialog by rememberSaveable { mutableStateOf(false) }
     var openTaskDialog by rememberSaveable { mutableStateOf(false) }
+    val today by rememberSaveable {
+        mutableStateOf(LocalDate.now().toEpochDay())
+    }
 
 
     Scaffold(
@@ -110,7 +113,7 @@ fun HomeScreen(
             ) {
                 items(uiState.dateRow) { item ->
 
-                    DateRow(item.Date, item.dateString, item.epoch, uiState.date,
+                    DateRow(item.Date, item.dateString, item.epoch, uiState.date, today,
                         onClick = {
                             viewModel.onEvent(TaskEvent.OnDateChange(item.epoch))
                         }
@@ -190,13 +193,16 @@ fun HomeScreen(
                         onClick = {
                             viewModel.onEvent(TaskEvent.SetTask(task = task))
                             if (task.subTasks.isNotEmpty()) openSubTaskDialog = true
-                            viewModel.onEvent(
-                                TaskEvent.UpdateProgress(
-                                    viewModel.taskDetailsUiState.progress.copy(
-                                        isCompleted = !viewModel.taskDetailsUiState.progress.isCompleted
+                            else {
+                                val completed = !viewModel.taskDetailsUiState.progress.isCompleted
+                                viewModel.onEvent(
+                                    TaskEvent.UpdateProgress(
+                                        viewModel.taskDetailsUiState.progress.copy(
+                                            isCompleted = completed,
+                                        )
                                     )
                                 )
-                            )
+                            }
                         },
                         onLongClick = {
                             viewModel.onEvent(TaskEvent.SetTask(task = task))
@@ -232,8 +238,12 @@ fun DateRow(
     dateString: String,
     epoch: Long,
     selectedDate: Long = LocalDate.now().toEpochDay(),
+    today: Long,
     onClick: () -> Unit
 ) {
+    var clickable by remember {
+        mutableStateOf(true)
+    }
     var modifier = Modifier
         .padding(end = 15.dp)
         .height(50.dp)
@@ -243,10 +253,14 @@ fun DateRow(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .background(color = MaterialTheme.colorScheme.primaryContainer)
+
+
     }
-    modifier = modifier.clickable { onClick() }
+    if (epoch > today) clickable = false
+
+
     Box(
-        modifier = modifier,
+        modifier = modifier.clickable(enabled = clickable) { onClick() },
         contentAlignment = Alignment.Center
     ) {
 
@@ -291,6 +305,10 @@ fun HabitRow(
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = taskWithProgress().title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(text = progressText, style = MaterialTheme.typography.labelSmall)
+            Text(
+                text = "${taskWithProgress().progress!!.streak} day Streak",
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 }

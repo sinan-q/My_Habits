@@ -70,6 +70,8 @@ data class Progress(
     @ColumnInfo(name = "is_completed")
     val isCompleted: Boolean = false,
     val subTasks: List<SubTask> = emptyList(),
+    @ColumnInfo(defaultValue = "0")
+    val streak: Int = 0,
     val note: String = ""
-    )
+)
 
