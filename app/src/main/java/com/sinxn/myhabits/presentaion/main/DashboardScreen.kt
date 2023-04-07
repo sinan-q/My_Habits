@@ -30,12 +30,11 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DashboardScreen(
     navController: NavController,
+    scrollBehavior: TopAppBarScrollBehavior,
+
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.dashboardUiState
-
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     var mDisplayMenu by remember { mutableStateOf(false) }
 
     Scaffold(

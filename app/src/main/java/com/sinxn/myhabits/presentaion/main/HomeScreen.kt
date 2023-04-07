@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HomeScreen(
     navController: NavController,
+    scrollBehavior: TopAppBarScrollBehavior,
     viewModel: MainViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -47,8 +48,6 @@ fun HomeScreen(
     val today by rememberSaveable {
         mutableStateOf(LocalDate.now().toEpochDay())
     }
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     var mDisplayMenu by remember { mutableStateOf(false) }
 
 
