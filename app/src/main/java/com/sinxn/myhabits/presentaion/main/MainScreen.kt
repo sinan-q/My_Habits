@@ -63,8 +63,7 @@ fun MainScreen(
                 },
                 title = {
                     Text(
-                        text = navController.currentDestination?.route
-                            ?: stringResource(id = R.string.app_name),
+                        text = stringResource(id = R.string.app_name),
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = (Constants.collapsedTextSize + (Constants.expandedTextSize - Constants.collapsedTextSize) * (1 - scrollBehavior.state.collapsedFraction)).sp
                     )

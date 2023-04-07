@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.sinxn.myhabits.R
 import com.sinxn.myhabits.domain.model.TaskWithProgress
 import com.sinxn.myhabits.presentaion.main.components.SubTaskDialog
 import com.sinxn.myhabits.presentaion.main.components.TaskDialog
@@ -174,7 +175,7 @@ fun HomeScreen(
                     )
                     IconButton(onClick = { /*TODO*/ }) {
                         Icon(
-                            painter = painterResource(id = android.R.drawable.presence_invisible),
+                            painter = painterResource(id = R.drawable.eye_hide),
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -281,19 +282,25 @@ fun HabitRow(
     onLongClick: () -> Unit
 
 ) {
-    val subTasksSize = (taskWithProgress().subTasks.size)
+    val subTasksSize by remember { mutableStateOf(taskWithProgress().subTasks.size) }
 
-    val progress = (taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?: 0)
+    val progress by remember {
+        mutableStateOf(
+            taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?: 0
+        )
+    }
+    val streak by remember { mutableStateOf(taskWithProgress().progress?.streak ?: 0) }
 
     val progressText =
         if (subTasksSize != 0) "$progress/$subTasksSize" else if (taskWithProgress().progress?.isCompleted == true) "Completed" else "Not Completed"
 
-    Box(modifier = Modifier
-        .padding(end = 35.dp)
-        .width(100.dp)
-        .height(150.dp)
-        .combinedClickable(onClick = { onClick() },
-            onLongClick = { onLongClick() })
+    Box(
+        modifier = Modifier
+            .padding(end = 35.dp)
+            .width(100.dp)
+            .height(150.dp)
+            .combinedClickable(onClick = { onClick() },
+                onLongClick = { onLongClick() })
     )
     {
         Column(modifier = Modifier
@@ -305,10 +312,11 @@ fun HabitRow(
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = taskWithProgress().title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(text = progressText, style = MaterialTheme.typography.labelSmall)
-            Text(
-                text = "${taskWithProgress().progress!!.streak} day Streak",
-                style = MaterialTheme.typography.labelSmall
-            )
+            if (streak > 1)
+                Text(
+                    text = "$streak day Streak",
+                    style = MaterialTheme.typography.labelSmall
+                )
         }
     }
 }
