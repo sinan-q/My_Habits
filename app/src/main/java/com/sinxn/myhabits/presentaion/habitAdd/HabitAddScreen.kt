@@ -27,6 +27,8 @@ import com.sinxn.myhabits.util.Constants.collapsedTextSize
 import com.sinxn.myhabits.util.Constants.expandedTextSize
 import com.sinxn.myhabits.util.settings.Interval
 import com.sinxn.myhabits.util.settings.toInt
+import java.time.Instant
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,14 +48,16 @@ fun HabitAddScreen(
     var interval by rememberSaveable { mutableStateOf(Interval.DAILY) }
     var enableRemainder by rememberSaveable { mutableStateOf(false) }
     val subTasks = remember { mutableStateListOf<SubTask>() }
-    // val dueDate by remember { mutableStateOf(false) }
+    var dueDate by remember { mutableStateOf("0") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+
 
     Scaffold(
         topBar = {
             LargeTopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-
+                    IconButton(onClick = { navController.popBackStack() }) { //TODO BackIcon
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -199,6 +203,31 @@ fun HabitAddScreen(
 
 
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = "Due Date",
+                    style = MaterialTheme.typography.headlineLarge
+                )
+                Text(
+                    text = dueDate,
+                    modifier = Modifier
+                        .width(50.dp)
+                        .clickable { showDatePicker = true },
+                )
+                Text(
+                    text = "X",
+                    modifier = Modifier
+                        .padding(horizontal = 15.dp)
+                        .clickable { dueDate = "0" },
+                )
+
+            }
 
         }
         Row(
@@ -235,7 +264,8 @@ fun HabitAddScreen(
                                 createdDate = System.currentTimeMillis(),
                                 updatedDate = System.currentTimeMillis(),
                                 subTasks = subTasks.toList(),
-                                remainder = enableRemainder
+                                remainder = enableRemainder,
+                                dueDate = dueDate.toLong()
                             )
                         )
                     )
@@ -247,6 +277,29 @@ fun HabitAddScreen(
                 Text(text = "Save", style = MaterialTheme.typography.headlineLarge)
             }
         }
+
+        if (showDatePicker) {
+            DatePickerDialog(onDismissRequest = { showDatePicker = false }, confirmButton = {
+                Button(
+                    onClick = {
+                        showDatePicker = false
+                        dueDate =
+                            datePickerState.selectedDateMillis.let {
+                                if (it != null) Instant.ofEpochMilli(it).atZone(
+                                    ZoneId.systemDefault()
+                                ).toLocalDate().toEpochDay().toString()
+                                else "0"
+                            }
+
+                    }) {
+                    Text(text = "Confirm")
+
+                }
+            }) {
+                DatePicker(state = datePickerState)
+            }
+        }
+
     }
 }
 
