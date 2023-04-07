@@ -1,14 +1,18 @@
 package com.sinxn.myhabits.data.local.dao
 
 import androidx.room.*
-import com.sinxn.myhabits.domain.model.Progress
-import com.sinxn.myhabits.domain.model.Task
-import com.sinxn.myhabits.domain.model.TaskWithProgress
-import com.sinxn.myhabits.domain.model.TaskWithProgresses
+import com.sinxn.myhabits.domain.model.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
+
+    @Transaction
+    @Query(
+        "SELECT * FROM tasks  WHERE tasks.due_date = 0 OR tasks.due_date >= :date; "
+    )
+    fun getTasksAndProgress(date: Long): Flow<List<TaskAndProgress>>
+
 
     @Transaction
     @Query(

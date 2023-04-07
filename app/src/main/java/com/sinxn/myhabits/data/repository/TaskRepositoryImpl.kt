@@ -1,10 +1,7 @@
 package com.sinxn.myhabits.data.repository
 
 import com.sinxn.myhabits.data.local.dao.TaskDao
-import com.sinxn.myhabits.domain.model.Progress
-import com.sinxn.myhabits.domain.model.Task
-import com.sinxn.myhabits.domain.model.TaskWithProgress
-import com.sinxn.myhabits.domain.model.TaskWithProgresses
+import com.sinxn.myhabits.domain.model.*
 import com.sinxn.myhabits.domain.repository.TaskRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -17,9 +14,14 @@ class TaskRepositoryImpl(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : TaskRepository {
 
-    override fun getAllTasks(date: Long): Flow<List<TaskWithProgress>> {
-        return taskDao.getTasksWithProgress(date).map { taskWithProgresses ->
-            taskWithProgresses.map { progress ->
+    override fun getAllTasks(date: Long): Flow<List<TaskAndProgress>> {
+        return taskDao.getTasksAndProgress(date)
+
+    }
+
+    override fun getAllTasksOnDate(date: Long): Flow<List<TaskWithProgress>> {
+        return taskDao.getTasksWithProgress(date).map { tasksWithProgress ->
+            tasksWithProgress.map { progress ->
                 progress.progress = progress.progress ?: Progress(
                     habitId = progress.id,
                     date = date,

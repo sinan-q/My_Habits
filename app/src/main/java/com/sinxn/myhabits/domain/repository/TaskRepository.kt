@@ -1,14 +1,11 @@
 package com.sinxn.myhabits.domain.repository
 
-import com.sinxn.myhabits.domain.model.Progress
-import com.sinxn.myhabits.domain.model.Task
-import com.sinxn.myhabits.domain.model.TaskWithProgress
-import com.sinxn.myhabits.domain.model.TaskWithProgresses
+import com.sinxn.myhabits.domain.model.*
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
 
-    fun getAllTasks(date: Long): Flow<List<TaskWithProgress>>
+    fun getAllTasksOnDate(date: Long): Flow<List<TaskWithProgress>>
 
     suspend fun getTaskById(id: Long): TaskWithProgresses
 
@@ -27,4 +24,5 @@ interface TaskRepository {
     suspend fun deleteTask(id: Long)
     suspend fun updateTaskProgress(progress: Progress, today: Long)
     suspend fun isComplete(id: Long, date: Long): Boolean
+    fun getAllTasks(date: Long): Flow<List<TaskAndProgress>>
 }

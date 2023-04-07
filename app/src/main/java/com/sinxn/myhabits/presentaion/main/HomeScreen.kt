@@ -5,15 +5,18 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +33,7 @@ import com.sinxn.myhabits.util.Constants
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
@@ -43,9 +47,40 @@ fun HomeScreen(
     val today by rememberSaveable {
         mutableStateOf(LocalDate.now().toEpochDay())
     }
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    var mDisplayMenu by remember { mutableStateOf(false) }
 
 
     Scaffold(
+        topBar = {
+            LargeTopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "")
+                    }
+                    DropdownMenu(
+                        expanded = mDisplayMenu,
+                        onDismissRequest = { mDisplayMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Settings") },
+                            onClick = {
+                                navController.navigate(Screen.SettingsScreen.route)
+                            })
+                    }
+
+                },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = (Constants.collapsedTextSize + (Constants.expandedTextSize - Constants.collapsedTextSize) * (1 - scrollBehavior.state.collapsedFraction)).sp
+                    )
+                },
+            )
+        },
         floatingActionButton =
         {
             FloatingActionButton(onClick = { navController.navigate(Screen.HabitAddScreen.route) }) {
@@ -67,8 +102,12 @@ fun HomeScreen(
     ) {
         Column(
             modifier = Modifier
+                .padding(it)
+                .padding(horizontal = 15.dp)
                 .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState())
+
         ) {
             Spacer(modifier = Modifier.height(30.dp))
             Text(
@@ -108,10 +147,7 @@ fun HomeScreen(
             }
             Spacer(modifier = Modifier.height(15.dp))
 
-            LazyRow(
-                state = rememberLazyListState(initialFirstVisibleItemIndex = 2),
-                horizontalArrangement = Arrangement.Center
-            ) {
+            LazyRow(horizontalArrangement = Arrangement.Center) {
                 items(uiState.dateRow) { item ->
 
                     DateRow(item.Date, item.dateString, item.epoch, uiState.date, today,
@@ -284,21 +320,30 @@ fun HabitRow(
 ) {
     val subTasksSize by remember { mutableStateOf(taskWithProgress().subTasks.size) }
 
-    val progress by remember {
+    val progress by remember(taskWithProgress()) {
         mutableStateOf(
             taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?: 0
         )
     }
-    val streak by remember { mutableStateOf(taskWithProgress().progress?.streak ?: 0) }
+    val streak by remember(taskWithProgress()) {
+        mutableStateOf(
+            taskWithProgress().progress?.streak ?: 0
+        )
+    }
 
     val progressText =
         if (subTasksSize != 0) "$progress/$subTasksSize" else if (taskWithProgress().progress?.isCompleted == true) "Completed" else "Not Completed"
 
     Box(
         modifier = Modifier
-            .padding(end = 35.dp)
-            .width(100.dp)
+            .padding(end = 5.dp)
+            .width(120.dp)
             .height(150.dp)
+
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(4.dp)
+            )
             .combinedClickable(onClick = { onClick() },
                 onLongClick = { onLongClick() })
     )
@@ -317,6 +362,7 @@ fun HabitRow(
                     text = "$streak day Streak",
                     style = MaterialTheme.typography.labelSmall
                 )
+            Spacer(Modifier.height(15.dp))
         }
     }
 }

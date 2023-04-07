@@ -40,7 +40,7 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            for (i in -4..4) {
+            for (i in -4..0) {
                 val date = LocalDate.now().plusDays(i.toLong())
                 tasksUiState.dateRow.add(
                     DateRowClass(
@@ -151,7 +151,7 @@ class MainViewModel @Inject constructor(
 
     private fun getTasks(date: Long ,order: Order = Order.DateCreated(), showCompleted: Boolean = true) {
         getTasksJob?.cancel()
-        getTasksJob = taskRepository.getAllTasks(date)
+        getTasksJob = taskRepository.getAllTasksOnDate(date)
             .onEach { tasks ->
 
                 tasksUiState = tasksUiState.copy(
