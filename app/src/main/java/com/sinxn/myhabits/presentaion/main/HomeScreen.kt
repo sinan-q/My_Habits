@@ -1,6 +1,7 @@
 package com.sinxn.myhabits.presentaion.main
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -82,7 +84,9 @@ fun HomeScreen(
         },
         floatingActionButton =
         {
-            FloatingActionButton(onClick = { navController.navigate(Screen.HabitAddScreen.route) }) {
+            FloatingActionButton(
+                containerColor = MaterialTheme.colorScheme.background,
+                onClick = { navController.navigate(Screen.HabitAddScreen.route) }) {
                 Row(
                     Modifier.padding(horizontal = 15.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -98,10 +102,10 @@ fun HomeScreen(
             }
         }
 
-    ) {
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .padding(horizontal = 15.dp)
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -136,7 +140,7 @@ fun HomeScreen(
                 )
                 Text(
                     text = LocalDate.ofEpochDay(uiState.date)
-                        .format(DateTimeFormatter.ISO_LOCAL_DATE), //TODO selected date
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE),
                     fontSize = 16.sp
                 )
                 Text(
@@ -172,29 +176,28 @@ fun HomeScreen(
 
                 )
                 Text(
-                    text = "See More",
+                    text = stringResource(R.string.see_all),
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.outline
                 )
             }
             LazyRow(modifier = Modifier.padding(top = 15.dp, bottom = 15.dp)) {
                 items(uiState.goodTasks) { task ->
-                    HabitRow(taskWithProgress = { task },
-                        onClick = {
-                            viewModel.onEvent(TaskEvent.SetTask(task = task))
-                            if (task.subTasks.isNotEmpty()) openSubTaskDialog = true
-                            viewModel.onEvent(
-                                TaskEvent.UpdateProgress(
-                                    viewModel.taskDetailsUiState.progress.copy(
-                                        isCompleted = !viewModel.taskDetailsUiState.progress.isCompleted
-                                    )
+                    HabitRow(taskWithProgress = task, onClick = {
+                        viewModel.onEvent(TaskEvent.SetTask(task = task))
+                        if (task.subTasks.isNotEmpty()) openSubTaskDialog = true
+                        viewModel.onEvent(
+                            TaskEvent.UpdateProgress(
+                                viewModel.taskDetailsUiState.progress.copy(
+                                    isCompleted = !viewModel.taskDetailsUiState.progress.isCompleted
                                 )
                             )
-                        },
-                        onLongClick = {
-                            viewModel.onEvent(TaskEvent.SetTask(task = task))
-                            openTaskDialog = true
-                        })
+                        )
+                    }
+                    ) {
+                        viewModel.onEvent(TaskEvent.SetTask(task = task))
+                        openTaskDialog = true
+                    }
                 }
             }
             Row(
@@ -208,25 +211,29 @@ fun HomeScreen(
                         text = "Dont's",
                         style = MaterialTheme.typography.headlineLarge
                     )
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        viewModel.onEvent(
+                            TaskEvent.ShowDontTasks(!uiState.showDonts)
+                        )
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.eye_hide),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }
 
                 Text(
-                    text = "See More",
+                    text = stringResource(R.string.see_all),
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.outline
                 )
             }
-            LazyRow {
-                items(uiState.badTasks) { task ->
-                    HabitRow(taskWithProgress = { task },
-                        onClick = {
+            if (uiState.showDonts)
+                LazyRow {
+                    items(uiState.badTasks) { task ->
+                        HabitRow(taskWithProgress = task, onClick = {
                             viewModel.onEvent(TaskEvent.SetTask(task = task))
                             if (task.subTasks.isNotEmpty()) openSubTaskDialog = true
                             else {
@@ -239,14 +246,14 @@ fun HomeScreen(
                                     )
                                 )
                             }
-                        },
-                        onLongClick = {
+                        }
+                        ) {
                             viewModel.onEvent(TaskEvent.SetTask(task = task))
                             openTaskDialog = true
-                        })
+                        }
 
+                    }
                 }
-            }
             if (openSubTaskDialog)
                 SubTaskDialog(
                     task = viewModel.taskDetailsUiState,
@@ -285,11 +292,16 @@ fun DateRow(
         .height(50.dp)
         .width(60.dp)
 
+    val targetColor = if (epoch == selectedDate) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        Color.Transparent
+    }
+    val backgroundColor = animateColorAsState(targetColor)
     if (epoch == selectedDate) {
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(color = MaterialTheme.colorScheme.primaryContainer)
-
+            .background(color = backgroundColor.value)
 
     }
     if (epoch > today) clickable = false
@@ -312,27 +324,30 @@ fun DateRow(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HabitRow(
-    taskWithProgress: () -> (TaskWithProgress),
+    taskWithProgress: TaskWithProgress,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 
 ) {
-    val subTasksSize by remember { mutableStateOf(taskWithProgress().subTasks.size) }
 
-    val progress by remember(taskWithProgress()) {
+    val subTasksSize by remember { mutableStateOf(taskWithProgress.subTasks.size) }
+
+    val progress by remember(taskWithProgress) {
         mutableStateOf(
-            taskWithProgress().progress?.subTasks?.filter { it.isCompleted }?.size ?: 0
+            taskWithProgress.progress?.subTasks?.filter { it.isCompleted }?.size ?: 0
         )
     }
-    val streak by remember(taskWithProgress()) {
+    val streak by remember(taskWithProgress) {
         mutableStateOf(
-            taskWithProgress().progress?.streak ?: 0
+            taskWithProgress.progress?.streak ?: 0
         )
     }
 
     val progressText =
-        if (subTasksSize != 0) "$progress/$subTasksSize" else if (taskWithProgress().progress?.isCompleted == true) "Completed" else "Not Completed"
-
+        if (subTasksSize != 0) "$progress/$subTasksSize" else if (taskWithProgress.progress?.isCompleted == true) "Completed" else "Not Completed"
+    val targetColor =
+        if (taskWithProgress.progress?.isCompleted == false) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.primaryContainer
+    val backgroundColor = animateColorAsState(targetValue = targetColor)
     Box(
         modifier = Modifier
             .padding(end = 5.dp)
@@ -340,7 +355,7 @@ fun HabitRow(
             .height(150.dp)
 
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = backgroundColor.value,
                 shape = RoundedCornerShape(4.dp)
             )
             .combinedClickable(onClick = { onClick() },
@@ -350,11 +365,11 @@ fun HabitRow(
         Column(modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.55f),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-            Text(text = taskWithProgress().emoji, fontSize = 45.sp)
+            Text(text = taskWithProgress.emoji, fontSize = 45.sp)
         }
 
         Column( modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = taskWithProgress().title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = taskWithProgress.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(text = progressText, style = MaterialTheme.typography.labelSmall)
             if (streak > 1)
                 Text(

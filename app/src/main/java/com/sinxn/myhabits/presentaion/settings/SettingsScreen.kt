@@ -63,11 +63,11 @@ fun SettingsScreen(
                 },
             )
         },
-    ) {
+    ) { paddingValues ->
 
         Column(modifier = Modifier
             .fillMaxWidth()
-            .padding(it)
+            .padding(paddingValues)
             .padding(top = 15.dp)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState())

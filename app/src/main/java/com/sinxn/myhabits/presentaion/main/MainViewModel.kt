@@ -81,15 +81,12 @@ class MainViewModel @Inject constructor(
 //                    event.order.toInt()
 //                )
 //            }
-//            is TaskEvent.ShowCompletedTasks -> viewModelScope.launch {
-//                saveSettings(
-//                    booleanPreferencesKey(Constants.SHOW_COMPLETED_TASKS_KEY),
-//                    event.showCompleted
-//                )
-//            }
+            is TaskEvent.ShowDontTasks -> viewModelScope.launch {
+                tasksUiState = tasksUiState.copy(showDonts = event.showDont)
+            }
             is TaskEvent.SearchTasks -> {
                 viewModelScope.launch {
-                    searchTasks(tasksUiState.date,event.query)
+                    searchTasks(tasksUiState.date, event.query)
                 }
             }
             is TaskEvent.OnDateChange -> viewModelScope.launch {
@@ -131,7 +128,7 @@ class MainViewModel @Inject constructor(
     data class UiState(
         val goodTasks: List<TaskWithProgress> = emptyList(),
         val badTasks: List<TaskWithProgress> = emptyList(),
-
+        val showDonts: Boolean = true,
         val taskOrder: Order = Order.DateModified(OrderType.ASC()),
         val showCompletedTasks: Boolean = false,
         val error: String? = null,

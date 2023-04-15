@@ -11,7 +11,7 @@ sealed class TaskEvent {
     data class AddTask(val task: Task) : TaskEvent()
     data class SearchTasks(val query: String) : TaskEvent()
     data class UpdateOrder(val order: Order) : TaskEvent()
-    data class ShowCompletedTasks(val showCompleted: Boolean) : TaskEvent()
+    data class ShowDontTasks(val showDont: Boolean) : TaskEvent()
     data class UpdateTask(val task: Task, val dueDateUpdated: Boolean) : TaskEvent()
     data class UpdateProgress(val progress: Progress) : TaskEvent()
 

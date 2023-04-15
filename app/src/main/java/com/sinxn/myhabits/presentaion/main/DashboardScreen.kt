@@ -83,7 +83,7 @@ fun DashboardScreen(
                             RowElementText(text = "Date")
 
                         }
-                        itemsIndexed(items = uiState.tasks) { index: Int, item: TaskAndProgress ->
+                        itemsIndexed(items = uiState.tasks) { _: Int, item: TaskAndProgress ->
                             RowElementText(text = item.task.title)
                         }
                     }
@@ -97,7 +97,7 @@ fun DashboardScreen(
                                 )
                             )
                         }
-                        itemsIndexed(items = uiState.tasks) { index: Int, taskAndProgress: TaskAndProgress ->
+                        itemsIndexed(items = uiState.tasks) { _: Int, taskAndProgress: TaskAndProgress ->
                             val item by remember(taskAndProgress) {
                                 mutableStateOf(taskAndProgress.progress.find { progress -> progress.date == date })
                             }
