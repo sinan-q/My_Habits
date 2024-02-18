@@ -16,7 +16,7 @@ object Constants {
     const val TASK_DETAILS_URI = "app://com.sinxn.myhabits/task_details"
 
     //TopAppBar
-    const val collapsedTextSize = 16
+    const val collapsedTextSize = 20
     const val expandedTextSize = 28
 
     //Settings

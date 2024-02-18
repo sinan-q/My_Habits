@@ -128,27 +128,7 @@ fun HomeScreen(
 
             )
             Spacer(modifier = Modifier.height(15.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            )
-            {
-                Text(
-                    text = "<",
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = LocalDate.ofEpochDay(uiState.date)
-                        .format(DateTimeFormatter.ISO_LOCAL_DATE),
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = ">",
-                    fontSize = 16.sp
-                )
-            }
-            Spacer(modifier = Modifier.height(15.dp))
+
 
             LazyRow(horizontalArrangement = Arrangement.Center) {
                 items(uiState.dateRow) { item ->
@@ -161,7 +141,6 @@ fun HomeScreen(
                 }
             }
             Spacer(modifier = Modifier.height(5.dp))
-            Divider(color = LocalContentColor.current)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

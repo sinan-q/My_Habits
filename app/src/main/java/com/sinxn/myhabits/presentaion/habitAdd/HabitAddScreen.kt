@@ -228,55 +228,46 @@ fun HabitAddScreen(
                 )
 
             }
-
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 50.dp, horizontal = 15.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            OutlinedButton(
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 5.dp),
-                onClick = {
-                    navController.popBackStack()
-                },
-                shape = MaterialTheme.shapes.medium,
+                    .fillMaxSize()
+                    .padding(vertical = 50.dp, horizontal = 15.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.Bottom
             ) {
-                Text(text = "Cancel", style = MaterialTheme.typography.headlineLarge)
-            }
-            Button(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 5.dp),
 
-                onClick = {
-                    viewModel.onEvent(
-                        TaskEvent.AddTask(
-                            Task(
-                                title = name,
-                                category = category,
-                                interval = interval.toInt(),
-                                emoji = emoji,
-                                createdDate = System.currentTimeMillis(),
-                                updatedDate = System.currentTimeMillis(),
-                                subTasks = subTasks.toList(),
-                                remainder = enableRemainder,
-                                dueDate = dueDate.toLong()
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 5.dp),
+
+                    onClick = {
+                        viewModel.onEvent(
+                            TaskEvent.AddTask(
+                                Task(
+                                    title = name,
+                                    category = category,
+                                    interval = interval.toInt(),
+                                    emoji = emoji,
+                                    createdDate = System.currentTimeMillis(),
+                                    updatedDate = System.currentTimeMillis(),
+                                    subTasks = subTasks.toList(),
+                                    remainder = enableRemainder,
+                                    dueDate = dueDate.toLong()
+                                )
                             )
                         )
-                    )
-                    navController.popBackStack()
-                },
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text(text = "Save", style = MaterialTheme.typography.headlineLarge)
+                        navController.popBackStack()
+                    },
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(text = "Save", style = MaterialTheme.typography.headlineLarge)
+                }
             }
+
         }
+
 
         if (showDatePicker) {
             DatePickerDialog(onDismissRequest = { showDatePicker = false }, confirmButton = {
@@ -346,11 +337,11 @@ fun IntervalMenu(
         mutableStateOf(false)
     }
     var intervalSelected by remember {
-        mutableStateOf(Interval.DAILY.title)
+        mutableIntStateOf(Interval.DAILY.title)
     }
 
     Box {
-        Button(
+        OutlinedButton(
             onClick = { expanded = true },
             shape = MaterialTheme.shapes.medium,
         ) {
