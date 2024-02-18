@@ -50,6 +50,7 @@ class MainViewModel @Inject constructor(
                     )
                 )
             }
+            tasksUiState = tasksUiState.copy(date = tasksUiState.dateRow.last())
             getTasks(LocalDate.now().toEpochDay())
 
         }
@@ -86,12 +87,12 @@ class MainViewModel @Inject constructor(
             }
             is TaskEvent.SearchTasks -> {
                 viewModelScope.launch {
-                    searchTasks(tasksUiState.date, event.query)
+                    tasksUiState.date?.epoch?.let { searchTasks(it, event.query) }
                 }
             }
             is TaskEvent.OnDateChange -> viewModelScope.launch {
                 tasksUiState = tasksUiState.copy(date = event.date)
-                getTasks(event.date)
+                getTasks(event.date.epoch)
             }
             is TaskEvent.UpdateProgress -> viewModelScope.launch {
                 taskRepository.updateTaskProgress(
@@ -132,7 +133,7 @@ class MainViewModel @Inject constructor(
         val taskOrder: Order = Order.DateModified(OrderType.ASC()),
         val showCompletedTasks: Boolean = false,
         val error: String? = null,
-        val date: Long = LocalDate.now().toEpochDay(),
+        val date: DateRowClass? = null,
         var dateRow: MutableList<DateRowClass> = mutableListOf(),
 
 

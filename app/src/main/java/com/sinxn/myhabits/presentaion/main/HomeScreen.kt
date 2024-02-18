@@ -1,6 +1,8 @@
 package com.sinxn.myhabits.presentaion.main
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -48,10 +50,12 @@ fun HomeScreen(
     var openSubTaskDialog by rememberSaveable { mutableStateOf(false) }
     var openTaskDialog by rememberSaveable { mutableStateOf(false) }
     val today by rememberSaveable {
-        mutableStateOf(LocalDate.now().toEpochDay())
+        mutableLongStateOf(LocalDate.now().toEpochDay())
     }
     var mDisplayMenu by remember { mutableStateOf(false) }
-
+    var visible by remember {
+        mutableStateOf(false)
+    }
 
     Scaffold(
         topBar = {
@@ -113,33 +117,53 @@ fun HomeScreen(
 
         ) {
             Spacer(modifier = Modifier.height(30.dp))
-            Text(
-                text = "Welcome,", //TODO get from res
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Text(
-                text = settingsViewModel.getSettings(
-                    stringPreferencesKey(Constants.USER_NAME),
-                    "User"
-                ).collectAsState(
-                    initial = "User"
-                ).value,
-                style = MaterialTheme.typography.headlineLarge
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text(
+                        text = "Welcome,", //TODO get from res
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = settingsViewModel.getSettings(
+                            stringPreferencesKey(Constants.USER_NAME),
+                            "User"
+                        ).collectAsState(
+                            initial = "User"
+                        ).value,
+                        style = MaterialTheme.typography.headlineLarge
 
-            )
-            Spacer(modifier = Modifier.height(15.dp))
+                    )
+                }
 
 
-            LazyRow(horizontalArrangement = Arrangement.Center) {
-                items(uiState.dateRow) { item ->
+                uiState.date?.let { date->
 
-                    DateRow(item.Date, item.dateString, item.epoch, uiState.date, today,
+                    DateRow(date.Date, date.dateString, date.epoch, today, today,
                         onClick = {
-                            viewModel.onEvent(TaskEvent.OnDateChange(item.epoch))
+                            visible = visible.not()
                         }
                     )
                 }
+
             }
+
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+
+            AnimatedVisibility(visible) {
+                LazyRow(horizontalArrangement = Arrangement.Center) {
+                    items(uiState.dateRow) { item ->
+
+                        DateRow(item.Date, item.dateString, item.epoch, uiState.date?.epoch, today,
+                            onClick = {
+                                viewModel.onEvent(TaskEvent.OnDateChange(item))
+                            }
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(5.dp))
             Row(
                 modifier = Modifier
@@ -236,7 +260,7 @@ fun HomeScreen(
             if (openSubTaskDialog)
                 SubTaskDialog(
                     task = viewModel.taskDetailsUiState,
-                    date = uiState.date
+                    date = uiState.date?.epoch?: 0L
                 ) {
                     openSubTaskDialog = false
                     viewModel.onEvent(TaskEvent.UpdateProgress(it))
@@ -259,7 +283,7 @@ fun DateRow(
     date: String,
     dateString: String,
     epoch: Long,
-    selectedDate: Long = LocalDate.now().toEpochDay(),
+    selectedDate: Long? = LocalDate.now().toEpochDay(),
     today: Long,
     onClick: () -> Unit
 ) {

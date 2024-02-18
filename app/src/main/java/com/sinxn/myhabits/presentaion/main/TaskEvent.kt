@@ -16,7 +16,7 @@ sealed class TaskEvent {
     data class UpdateProgress(val progress: Progress) : TaskEvent()
 
     data class DeleteTask(val task: Long) : TaskEvent()
-    data class OnDateChange(val date: Long) : TaskEvent()
+    data class OnDateChange(val date: DateRowClass) : TaskEvent()
 
     object ErrorDisplayed: TaskEvent()
 }
