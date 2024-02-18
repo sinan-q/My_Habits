@@ -80,18 +80,30 @@ fun HabitAddScreen(
                 .padding(horizontal = 15.dp)
         )
         {
-            Text(
+            Row(
                 modifier = Modifier
-                    .padding(top = 30.dp)
-                    .padding(bottom = 15.dp),
-                text = "Enter Habit Name",
-                style = MaterialTheme.typography.headlineLarge
-            )
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                modifier = Modifier.fillMaxWidth()
-            )
+                    .fillMaxWidth()
+                    .padding(top = 30.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = emoji,
+                    onValueChange = {
+                        if (it.length < 3)
+                            emoji = it
+                    },
+                    modifier = Modifier.width(60.dp),
+                    textStyle = TextStyle(fontSize = 20.sp),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.wrapContentSize()
+                )
+
+            }
             Row(Modifier.padding(top = 30.dp)) {
                 Text(
                     modifier = Modifier.weight(1f),
@@ -124,30 +136,7 @@ fun HabitAddScreen(
                     )
                 }
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    modifier = Modifier,
-                    text = "Select Emoji",
-                    style = MaterialTheme.typography.headlineLarge
-                )
-                OutlinedTextField(
-                    value = emoji,
-                    onValueChange = {
-                        if (it.length < 3)
-                            emoji = it
-                    },
-                    modifier = Modifier.width(60.dp),
-                    textStyle = TextStyle(fontSize = 20.sp),
-                    singleLine = true
-                )
 
-            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
