@@ -11,8 +11,8 @@ import com.sinxn.myhabits.domain.model.Task
 
 @Database(
     entities = [Task::class, Progress::class],
-    version = 1_1,
-    autoMigrations = [AutoMigration(from = 1, to = 1_1)],
+    version = 1,
+    //autoMigrations = [AutoMigration(from = 1, to = 1_1)],
     exportSchema = true
 )
 

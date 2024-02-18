@@ -19,19 +19,13 @@ import javax.inject.Inject
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = Constants.SETTINGS_PREFERENCES)
 
 @HiltAndroidApp
-class MyHabitApplication : Application() , Configuration.Provider {
+class MyHabitApplication : Application() {
 
     companion object {
         lateinit var appContext: Context
     }
 
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
 
-    override fun getWorkManagerConfiguration() =
-        Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
 
     override fun onCreate() {
         super.onCreate()
@@ -50,6 +44,8 @@ class MyHabitApplication : Application() , Configuration.Provider {
         notificationManager.createNotificationChannel(channel)
 
     }
+
+
 }
 
 // for string resources where context is not available
